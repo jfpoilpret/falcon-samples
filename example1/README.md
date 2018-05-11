@@ -5,7 +5,6 @@ Preparation
 -----------
 Prepare a virtual environment for the project sample:
 
-	mkdir example1
 	cd example1
 	python3 -m venv .venv
 	source .venv/bin/activate
@@ -15,12 +14,11 @@ Also install useful tools during project development:
 
 	pip3 install ipython	# IDLE useful for checking API doc
 	pip3 install gunicorn	# Web server engine useful for testing
-	pip3 install httpie	# A better curl, useful for testing
+	pip3 install httpie	# A better curl, useful for testing REST API
 	pip3 install pytest	# Automated tests library
 
 Develop first example
 ---------------------
-
 Create a main module (same name as application, why is that mandatory? I don't know):
 
 	mkdir example1
@@ -37,3 +35,7 @@ Now run the server with gunicorn:
 
 	gunicorn --reload example1.app
 
+Debug with Visual Studio Code
+-----------------------------
+
+Open `server.py` file and run Debug "Python: Current File".
