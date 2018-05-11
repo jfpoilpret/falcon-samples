@@ -11,6 +11,12 @@
             "program": "${file}"
         },
         {
+            "name": "Python: Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/server.py"
+        },
+        {
             "name": "Python: Attach",
             "type": "python",
             "request": "attach",

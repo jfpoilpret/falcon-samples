@@ -35,6 +35,10 @@ Now run the server with gunicorn:
 
 	gunicorn --reload example1.app
 
+Run unit tests:
+
+	pytest tests
+
 Debug with Visual Studio Code
 -----------------------------
 
