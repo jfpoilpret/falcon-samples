@@ -6,11 +6,12 @@ from marshmallow import fields, Schema
 
 class TeamSchema(Schema):
     id = fields.Integer()
-    name = fields.String()
+    name = fields.String(required=True)
 
 #FIXME issue with id sequence if we allow delete...
 class Team(object):
-    #schema = TeamSchema()
+    get_schema = TeamSchema(many = True)
+    schema = TeamSchema()
 
     JSON_STORAGE = 'example2/data/teams.json'
 
