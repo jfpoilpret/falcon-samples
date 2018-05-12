@@ -1,0 +1,8 @@
+{
+    "python.unitTest.pyTestArgs": [
+        "tests"
+    ],
+    "python.unitTest.pyTestEnabled": true,
+    "python.unitTest.pyTestPath": "${workspaceFolder}/.venv/bin/pytest",
+    "python.unitTest.cwd": "${workspaceFolder}"
+}
