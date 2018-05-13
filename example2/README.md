@@ -1,6 +1,8 @@
 Python Falcon Example 2
 =======================
 
+This example adds JSON validation through Marshmallow integration to Falcon. It also implements extra simple persistence to a JSON file.
+
 Preparation
 -----------
 Prepare a virtual environment for the project sample:

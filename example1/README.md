@@ -1,6 +1,11 @@
 Python Falcon Example 1
 =======================
 
+This first example simply demonstrates a simple REST API with Falcon, without validation, authentication or persistence.
+The purpose is to learn Falcon step by step.
+The example also demonstrates unit tests for Falcon REST resources.
+Finally, this shows how to easily run a server (with Gunicorn) and test it live, with curl or httpie.
+
 Preparation
 -----------
 Prepare a virtual environment for the project sample:
