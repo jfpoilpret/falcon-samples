@@ -17,7 +17,7 @@ sql_middleware = SqlAlchemy(engine)
 create_db(engine)
 
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
-api = application = API(middleware=[Marshmallow(), sql_middleware])
+api = application = API(middleware=[sql_middleware, Marshmallow()])
 
 api.add_route('/team', Teams())
 api.add_route('/team/{id:int}', Team())

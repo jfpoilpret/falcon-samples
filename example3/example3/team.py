@@ -15,8 +15,12 @@ class Teams(object):
         req.context['result'] = self._session.query(DBTeam).all()
 
     def on_post(self, req, resp):
-        #TODO update to SQLAlchemy
-        req.context['result'] = self._storage.add_team(req.context['json'])
+        #TODO exception handling? (primary key, other constraints...)
+        team = DBTeam(**req.context['json'])
+        self._session.add(team)
+        self._session.commit()
+        self._session.refresh(team)
+        req.context['result'] = team
         resp.status = falcon.HTTP_CREATED
 
 class Team(object):
@@ -30,10 +34,11 @@ class Team(object):
             resp.status = falcon.HTTP_NOT_FOUND
 
     def on_delete(self, req, resp, id):
-        #TODO update to SQLAlchemy
-        if not self._storage.remove_team(id):
+        team = self._session.query(DBTeam, id = id).one_or_none()
+        if not team:
             resp.status = falcon.HTTP_NOT_FOUND
         else:
+            self._session.delete(team)
             resp.status = falcon.HTTP_NO_CONTENT
 
     #TODO put, patch
