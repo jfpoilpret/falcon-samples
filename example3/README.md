@@ -8,7 +8,7 @@ Preparation
 -----------
 Prepare a virtual environment for the project sample:
 
-	cd example2
+	cd example3
 	python3 -m venv .venv
 	source .venv/bin/activate
 	pip3 install falcon
@@ -24,7 +24,7 @@ Also install useful tools during project development:
 
 Develop third example
 ----------------------
-Create new module from copy of example2 (without `.venv`, `__pycache__`...)
+Create new module from copy of example3 (without `.venv`, `__pycache__`...)
 
 
 
