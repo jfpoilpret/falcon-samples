@@ -3,7 +3,7 @@ from falcon import testing
 import json
 import pytest
 
-from example2.app import api
+from example3.app import api
 
 @pytest.fixture
 def client():
