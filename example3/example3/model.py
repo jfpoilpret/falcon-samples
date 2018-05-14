@@ -3,15 +3,15 @@ from sqlalchemy import Column, Integer, String
 
 Base  = declarative_base()
 
-#TODO Add group and other fields (flag, jersey...)
+#TODO Add other fields (flag, jersey...)
 #TODO review field attributes (size, unicity...)
 # Declare Team entity
 class DBTeam(Base):
     __tablename__ = 'team'
 
     id = Column(Integer, primary_key = True)
-    name = Column(String)
-    group = Column(String)
+    name = Column(String, nullable = False, unique = True)
+    group = Column(String, nullable = False)
 
     def __repr__(self):
         return 'Team(id = %d, name = %s, group = %s)' % (self.id, self.name, self.group)
