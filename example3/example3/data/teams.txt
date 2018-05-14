@@ -1,0 +1,32 @@
+Egypt	Group A
+Russia	Group A
+Saudi Arabia	Group A
+Uruguay	Group A
+Iran	Group B
+Morocco	Group B
+Portugal	Group B
+Spain	Group B
+Australia	Group C
+Denmark	Group C
+France	Group C
+Peru	Group C
+Argentina	Group D
+Croatia	Group D
+Iceland	Group D
+Nigeria	Group D
+Brazil	Group E
+Costa Rica	Group E
+Serbia	Group E
+Switzerland	Group E
+Germany	Group F
+Korea Republic	Group F
+Mexico	Group F
+Sweden	Group F
+Belgium	Group G
+England	Group G
+Panama	Group G
+Tunisia	Group G
+Colombia	Group H
+Japan	Group H
+Poland	Group H
+Senegal	Group H
