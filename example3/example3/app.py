@@ -4,7 +4,7 @@ from falcon_marshmallow import Marshmallow
 from sqlalchemy import create_engine
 
 from .sqlalchemy import SqlAlchemy
-from .model import create_db
+from .model import create_db, drop_db
 from .team import Team, Teams
 from .initdb import init_db
 
@@ -15,6 +15,7 @@ engine = create_engine(database)
 sql_middleware = SqlAlchemy(engine)
 
 # Create DB if not exists
+drop_db(engine)
 create_db(engine)
 init_db(sql_middleware.new_session())
 sql_middleware.delete_session()

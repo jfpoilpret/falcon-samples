@@ -3,9 +3,11 @@ from marshmallow import fields, Schema
 
 from .model import DBTeam
 
+#TODO review acceptable methods (no reason to create or delete team, even changing team is probably useless)
 class TeamSchema(Schema):
     id = fields.Integer()
     name = fields.String(required=True)
+    group = fields.String()
 
 class Teams(object):
     get_schema = TeamSchema(many = True)

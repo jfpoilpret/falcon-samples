@@ -8,6 +8,6 @@ def init_db(session):
 def init_teams(session):
     with io.open('example3/data/teams.txt') as f:
         for line in f:
-            fields = line.split('\t')
-            session.add(DBTeam(name = fields[0]))
+            fields = line[:-1].split('\t')
+            session.add(DBTeam(name = fields[0], group = fields[1]))
     session.commit()
