@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-#from sqlalchemy.types import DateTime
 
 Base  = declarative_base()
 
@@ -45,6 +46,12 @@ class DBMatch(Base):
     team2 = relationship(DBTeam, foreign_keys = [team2_id])
     
     result = Column(String)
+
+    def __repr__(self):
+        return 'Match(id = %d, date = %s, venue = %s, team1 = %s, team2 = %s, result = %s)' % 
+            (self.id, self.matchtime.strftime('%d.%m.%Y %H:%M'), self.venue.name if self.venue else "unknown",
+            self.team1.name if self.team1 else 'unknown', self.team2.name if self.team2 else 'unknown',
+            self.result or 'unknown')
 
 # Utility methods to create/drop DB schema from ORM mappings
 def create_db(engine):
