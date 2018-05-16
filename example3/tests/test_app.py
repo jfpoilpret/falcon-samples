@@ -67,3 +67,13 @@ def test_get_venue(client):
         'name': 'Luzhniki Stadium, Moscow',
     }
     assert actual == expected
+
+def test_list_matches(client):
+    response = client.simulate_get('/match')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    assert len(actual) == 64
+
+    #TODO more assertions on a few matches: venue, teams, time
+    
