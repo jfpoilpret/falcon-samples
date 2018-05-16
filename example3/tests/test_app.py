@@ -39,3 +39,31 @@ def test_get_team(client):
         'group': 'Group C'
     }
     assert actual == expected
+
+def test_list_venues(client):
+    response = client.simulate_get('/venue')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    assert len(actual) == 12
+    expected = {
+        'id': 1,
+        'name': 'Ekaterinburg Stadium',
+    }
+    assert actual[0] == expected
+    expected = {
+        'id': 12,
+        'name': 'Volgograd Stadium',
+    }
+    assert actual[11] == expected
+    
+def test_get_venue(client):
+    response = client.simulate_get('/venue/5')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'id': 5,
+        'name': 'Luzhniki Stadium, Moscow',
+    }
+    assert actual == expected

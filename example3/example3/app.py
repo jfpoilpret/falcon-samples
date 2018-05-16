@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from .sqlalchemy import SqlAlchemy
 from .model import create_db, drop_db
 from .team import Team, Teams
+from .venue import Venue, Venues
 from .initdb import init_db
 
 # Create SQLAlchemy engine
@@ -25,3 +26,5 @@ api = application = API(middleware=[sql_middleware, Marshmallow()])
 
 api.add_route('/team', Teams())
 api.add_route('/team/{id:int}', Team())
+api.add_route('/venue', Venues())
+api.add_route('/venue/{id:int}', Venue())
