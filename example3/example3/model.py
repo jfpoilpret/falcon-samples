@@ -48,8 +48,8 @@ class DBMatch(Base):
     result = Column(String)
 
     def __repr__(self):
-        return 'Match(id = %d, date = %s, venue = %s, team1 = %s, team2 = %s, result = %s)' % 
-            (self.id, self.matchtime.strftime('%d.%m.%Y %H:%M'), self.venue.name if self.venue else "unknown",
+        return 'Match(id = %d, date = %s, venue = %s, team1 = %s, team2 = %s, result = %s)' % (
+            self.id, self.matchtime.strftime('%d.%m.%Y %H:%M'), self.venue.name if self.venue else "unknown",
             self.team1.name if self.team1 else 'unknown', self.team2.name if self.team2 else 'unknown',
             self.result or 'unknown')
 
