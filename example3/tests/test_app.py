@@ -2,12 +2,21 @@ import falcon
 from falcon import testing
 import json
 import pytest
+from datetime import datetime
 
 from example3.app import api
 
 @pytest.fixture
 def client():
     return testing.TestClient(api)
+
+def assert_dict(expected, actual):
+    for key, value in expected.items():
+        print("assert_dict() %s %s" % (key, str(value)))
+        if isinstance(value, dict):
+            assert_dict(value, actual[key])
+        else:
+            assert value == actual[key]
 
 def test_list_teams(client):
     response = client.simulate_get('/team')
@@ -76,4 +85,33 @@ def test_list_matches(client):
     assert len(actual) == 64
 
     #TODO more assertions on a few matches: venue, teams, time
+    expected = {
+        'round': '1',
+        'matchtime': '2018-06-14T18:00:00+00:00',
+        'group': 'Group A',
+        'venue': {
+            'name': 'Luzhniki Stadium, Moscow'
+        },
+        'team1': {
+            'name': 'Russia'
+        },
+        'team2': {
+            'name': 'Saudi Arabia'
+        }
+    }
+    assert_dict(expected, actual[0])
+
+    expected = {
+        'round': 'Round of 16',
+        'matchtime': '2018-06-30T21:00:00+00:00',
+        'group': '',
+        'venue': {
+            'name': 'Fisht Stadium, Sochi'
+        },
+        'team1': None,
+        'team2': None
+    }
+    assert_dict(expected, actual[48])
     
+#TODO test get one match
+#TODO test patch one match
