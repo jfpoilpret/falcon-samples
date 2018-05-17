@@ -84,7 +84,6 @@ def test_list_matches(client):
     actual = json.loads(response.text)
     assert len(actual) == 64
 
-    #TODO more assertions on a few matches: venue, teams, time
     expected = {
         'round': '1',
         'matchtime': '2018-06-14T18:00:00+00:00',
@@ -113,5 +112,25 @@ def test_list_matches(client):
     }
     assert_dict(expected, actual[48])
     
-#TODO test get one match
+def test_get_match(client):
+    response = client.simulate_get('/match/35')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'round': '3',
+        'matchtime': '2018-06-25T21:00:00+00:00',
+        'group': 'Group B',
+        'venue': {
+            'name': 'Saransk Stadium'
+        },
+        'team1': {
+            'name': 'Iran'
+        },
+        'team2': {
+            'name': 'Portugal'
+        }
+    }
+    assert_dict(expected, actual)
+
 #TODO test patch one match
