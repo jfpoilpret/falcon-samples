@@ -1,10 +1,11 @@
 import falcon
 from marshmallow import fields, Schema
-
+from .marshmallow_util import URLFor
 from .model import DBTeam
 
 class TeamSchema(Schema):
     id = fields.Integer()
+    href = URLFor('/team/{id}')
     name = fields.String(required=True)
     group = fields.String()
 

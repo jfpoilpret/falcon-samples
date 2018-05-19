@@ -30,12 +30,14 @@ def test_list_teams(client):
     assert len(actual) == 32
     expected = {
         'id': 1,
+        'href': href('/team/1'),
         'name': 'Egypt',
         'group': 'Group A'
     }
     assert actual[0] == expected
     expected = {
         'id': 32,
+        'href': href('/team/32'),
         'name': 'Senegal',
         'group': 'Group H'
     }
@@ -48,6 +50,7 @@ def test_get_team(client):
     actual = json.loads(response.text)
     expected = {
         'id': 11,
+        'href': href('/team/11'),
         'name': 'France',
         'group': 'Group C'
     }
