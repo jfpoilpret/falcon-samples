@@ -164,22 +164,35 @@ def test_patch_match_time(client):
         'round': '3',
         'matchtime': '2018-06-26T21:00:00+00:00',
         'group': 'Group B',
-        'venue': {
-            'href': href('/venue/11'),
-            'name': 'Saransk Stadium'
-        },
-        'team1': {
-            'href': href('/team/5'),
-            'name': 'Iran'
-        },
-        'team2': {
-            'href': href('/team/7'),
-            'name': 'Portugal'
-        }
     }
     assert_dict(expected, actual)
 
     response = client.simulate_patch('/match/35', body = json.dumps({
         'matchtime': '2018-06-25T21:00:00+00:00'
+    }))
+    assert response.status == falcon.HTTP_OK
+
+def test_patch_match_venue(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'venue_id': 1
+    }))
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/match/35'),
+        'round': '3',
+        'matchtime': '2018-06-25T21:00:00+00:00',
+        'group': 'Group B',
+        'venue': {
+            'href': href('/venue/1'),
+            'name': 'Ekaterinburg Stadium'
+        }
+    }
+    assert_dict(expected, actual)
+
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'venue_id': 11
     }))
     assert response.status == falcon.HTTP_OK

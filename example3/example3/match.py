@@ -2,6 +2,7 @@ import falcon
 from marshmallow import fields, Schema
 from .marshmallow_util import URLFor
 from .model import DBMatch
+#TODO thsi is not normally useful (just need to use class names)
 from .team import TeamSchema
 from .venue import VenueSchema
 
@@ -14,7 +15,14 @@ class MatchSchema(Schema):
     team1 = fields.Nested(TeamSchema)
     team2 = fields.Nested(TeamSchema)
     group = fields.String()
-    # Pattern to respect for result: XX-XX
+    result = fields.String()
+
+class MatchPatchSchema(Schema):
+    matchtime = fields.DateTime()
+    venue_id = fields.Integer()
+    team1_id = fields.Integer()
+    team2_id = fields.Integer()
+    #TODO Pattern to respect for result: XX-XX
     result = fields.String()
 
 class Matches(object):
@@ -27,7 +35,7 @@ class Matches(object):
 # ADD PUT (or PATCH only?) to update a match (eg change time or venue or team or result)
 class Match(object):
     schema = MatchSchema()
-    patch_request_schema = MatchSchema(only = ('matchtime', 'venue.id', 'team1.id', 'team2.id', 'result'))
+    patch_request_schema = MatchPatchSchema()
 
     def on_get(self, req, resp, id):
         # type: (falcon.Request, falcon.Response, int) -> None
@@ -44,7 +52,9 @@ class Match(object):
             values = req.context['json']
             update = False
             #TODO include it into _update() utility method
-            for field in ('matchtime', 'venue.id', 'team1.id', 'team2.id', 'result'):
+            #TODO find a way to get the list of all fields in schema
+            for field in ('matchtime', 'venue_id', 'team1_id', 'team2_id', 'result'):
+#            for field in Match.patch_request_schema:
                 update = Match._update(match, field, values) or update
             if update:
                 self._session.add(match)
