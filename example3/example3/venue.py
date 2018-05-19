@@ -20,7 +20,7 @@ class Venue(object):
     schema = VenueSchema()
 
     def on_get(self, req, resp, id):
-        # type: (falcon.Request, falcon.Response, Int) -> None
+        # type: (falcon.Request, falcon.Response, int) -> None
         Venue = self._session.query(DBVenue).filter_by(id = id).one_or_none()
         if Venue:
             req.context['result'] = Venue
