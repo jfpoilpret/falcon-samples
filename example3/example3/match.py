@@ -1,6 +1,6 @@
 import falcon
 from marshmallow import fields, Schema
-
+from .marshmallow_util import URLFor
 from .model import DBMatch
 from .team import TeamSchema
 from .venue import VenueSchema
@@ -8,7 +8,7 @@ from .venue import VenueSchema
 #TODO Include all fields and refs URL where needed
 class MatchSchema(Schema):
     id = fields.Integer()
-#    href = fields.URL()
+    href = URLFor('/match/{id}')
     round = fields.String()
     matchtime = fields.DateTime()
     venue = fields.Nested(VenueSchema)

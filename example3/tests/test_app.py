@@ -95,6 +95,7 @@ def test_list_matches(client):
     assert len(actual) == 64
 
     expected = {
+        'href': href('/match/1'),
         'round': '1',
         'matchtime': '2018-06-14T18:00:00+00:00',
         'group': 'Group A',
@@ -111,6 +112,7 @@ def test_list_matches(client):
     assert_dict(expected, actual[0])
 
     expected = {
+        'href': href('/match/49'),
         'round': 'Round of 16',
         'matchtime': '2018-06-30T21:00:00+00:00',
         'group': '',
@@ -128,16 +130,20 @@ def test_get_match(client):
 
     actual = json.loads(response.text)
     expected = {
+        'href': href('/match/35'),
         'round': '3',
         'matchtime': '2018-06-25T21:00:00+00:00',
         'group': 'Group B',
         'venue': {
+            'href': href('/venue/11'),
             'name': 'Saransk Stadium'
         },
         'team1': {
+            'href': href('/team/5'),
             'name': 'Iran'
         },
         'team2': {
+            'href': href('/team/7'),
             'name': 'Portugal'
         }
     }
