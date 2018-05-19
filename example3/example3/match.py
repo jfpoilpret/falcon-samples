@@ -5,7 +5,6 @@ from .model import DBMatch
 from .team import TeamSchema
 from .venue import VenueSchema
 
-#TODO Include all fields and refs URL where needed
 class MatchSchema(Schema):
     id = fields.Integer()
     href = URLFor('/match/{id}')
