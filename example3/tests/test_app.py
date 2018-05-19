@@ -12,6 +12,7 @@ def href(path):
 
 @pytest.fixture
 def client():
+    # type: () -> testing.TestClient
     return testing.TestClient(api)
 
 def assert_dict(expected, actual):
@@ -149,4 +150,36 @@ def test_get_match(client):
     }
     assert_dict(expected, actual)
 
-#TODO test patch one match
+#TODO test patch one match for each field even forbidden fields, then several fields at once
+def test_patch_match_time(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'matchtime': '2018-06-26T21:00:00+00:00'
+    }))
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/match/35'),
+        'round': '3',
+        'matchtime': '2018-06-26T21:00:00+00:00',
+        'group': 'Group B',
+        'venue': {
+            'href': href('/venue/11'),
+            'name': 'Saransk Stadium'
+        },
+        'team1': {
+            'href': href('/team/5'),
+            'name': 'Iran'
+        },
+        'team2': {
+            'href': href('/team/7'),
+            'name': 'Portugal'
+        }
+    }
+    assert_dict(expected, actual)
+
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'matchtime': '2018-06-25T21:00:00+00:00'
+    }))
+    assert response.status == falcon.HTTP_OK
