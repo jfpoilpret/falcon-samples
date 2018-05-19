@@ -1,10 +1,14 @@
 import falcon
 from falcon import testing
+from falcon.testing import helpers
 import json
 import pytest
 from datetime import datetime
 
 from example3.app import api
+
+def href(path):
+    return 'http://' + helpers.DEFAULT_HOST + path
 
 @pytest.fixture
 def client():
@@ -56,11 +60,13 @@ def test_list_venues(client):
     actual = json.loads(response.text)
     assert len(actual) == 12
     expected = {
+        'href': href('/venue/1'),
         'id': 1,
         'name': 'Ekaterinburg Stadium',
     }
     assert actual[0] == expected
     expected = {
+        'href': href('/venue/12'),
         'id': 12,
         'name': 'Volgograd Stadium',
     }
@@ -72,6 +78,7 @@ def test_get_venue(client):
 
     actual = json.loads(response.text)
     expected = {
+        'href': href('/venue/5'),
         'id': 5,
         'name': 'Luzhniki Stadium, Moscow',
     }
