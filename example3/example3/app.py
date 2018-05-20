@@ -1,6 +1,8 @@
 import os
-from falcon import API
+import falcon
+from falcon import API, HTTPError
 from sqlalchemy import create_engine
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from falcon_marshmallow import Marshmallow
 from .marshmallow_util import context_middleware
@@ -26,8 +28,23 @@ create_db(engine)
 init_db(sql_middleware.new_session())
 sql_middleware.delete_session()
 
+#TODO put outside in some utility module
+class ExceptionHandler(object):
+    def __init__(self, status, title):
+        # type: (str, str) -> None
+        self._status = status
+        self._title = title
+
+    def __call__(self, ex, req, resp, params):
+        # type: (Exception, falcon.Request, falcon.response, dict) -> None
+        raise HTTPError(self._status, self._title, str(ex))
+
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
 api = application = API(middleware=[sql_middleware, context_middleware, Marshmallow()])
+
+api.add_error_handler(Exception, ExceptionHandler(falcon.HTTP_INTERNAL_SERVER_ERROR, "Internal error"))
+api.add_error_handler(DBAPIError, ExceptionHandler(falcon.HTTP_INTERNAL_SERVER_ERROR, "Database error"))
+api.add_error_handler(IntegrityError, ExceptionHandler(falcon.HTTP_UNPROCESSABLE_ENTITY, "Integrity constraint error"))
 
 api.add_route('/team', Teams())
 api.add_route('/team/{id:int}', Team())
