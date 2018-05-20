@@ -4,18 +4,15 @@ from marshmallow import fields, Schema, validates, ValidationError
 from .marshmallow_util import URLFor, StrictSchema
 from .falcon_util import update_item_fields
 from .model import DBMatch
-#TODO thsi is not normally useful (just need to use class names)
-from .team import TeamSchema
-from .venue import VenueSchema
 
 class MatchSchema(Schema):
     id = fields.Integer()
     href = URLFor('/match/{id}')
     round = fields.String()
     matchtime = fields.DateTime()
-    venue = fields.Nested(VenueSchema)
-    team1 = fields.Nested(TeamSchema)
-    team2 = fields.Nested(TeamSchema)
+    venue = fields.Nested('VenueSchema')
+    team1 = fields.Nested('TeamSchema')
+    team2 = fields.Nested('TeamSchema')
     group = fields.String()
     result = fields.String()
 
@@ -40,7 +37,6 @@ class Matches(object):
         # type: (falcon.Request, falcon.Response) -> None
         req.context['result'] = self._session.query(DBMatch).all()
 
-# ADD PUT (or PATCH only?) to update a match (eg change time or venue or team or result)
 class Match(object):
     schema = MatchSchema()
     patch_request_schema = MatchPatchSchema()
