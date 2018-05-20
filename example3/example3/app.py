@@ -6,6 +6,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from falcon_marshmallow import Marshmallow
 from .marshmallow_util import context_middleware
+from .falcon_util import ExceptionHandler
 from .sqlalchemy import SqlAlchemy
 from .model import create_db, drop_db
 
@@ -27,19 +28,6 @@ drop_db(engine)
 create_db(engine)
 init_db(sql_middleware.new_session())
 sql_middleware.delete_session()
-
-#TODO put outside in some utility module
-class ExceptionHandler(object):
-    def __init__(self, status, title):
-        # type: (str, str) -> None
-        self._status = status
-        self._title = title
-
-    def __call__(self, ex, req, resp, params):
-        # type: (Exception, falcon.Request, falcon.response, dict) -> None
-        print(ex.__class__)
-        print(ex)
-        raise HTTPError(self._status, self._title, str(ex))
 
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
 api = application = API(middleware=[sql_middleware, context_middleware, Marshmallow()])

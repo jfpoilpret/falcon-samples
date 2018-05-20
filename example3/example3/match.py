@@ -2,20 +2,11 @@ import re
 import falcon
 from marshmallow import fields, Schema, validates, validates_schema, ValidationError
 from .marshmallow_util import URLFor
+from .falcon_util import update_item_fields
 from .model import DBMatch
 #TODO thsi is not normally useful (just need to use class names)
 from .team import TeamSchema
 from .venue import VenueSchema
-
-#TODO Make this mehtod a general utility
-def update_item_fields(item, keys, values):
-    # type: (dict, list, dict) -> bool
-    update = False
-    for key in keys:
-        if key in values.keys():
-            setattr(item, key, values[key])
-            update = True
-    return update
 
 class MatchSchema(Schema):
     id = fields.Integer()
