@@ -23,7 +23,7 @@ class MatchPatchSchema(Schema):
     team1_id = fields.Integer()
     team2_id = fields.Integer()
     #TODO Pattern to respect for result: XX-XX
-    result = fields.String()
+    result = fields.String(allow_none=True)
 
 class Matches(object):
     schema = MatchSchema(many = True)

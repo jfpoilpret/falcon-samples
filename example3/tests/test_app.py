@@ -163,7 +163,7 @@ def test_patch_match_time(client):
         'href': href('/match/35'),
         'round': '3',
         'matchtime': '2018-06-26T21:00:00+00:00',
-        'group': 'Group B',
+        'group': 'Group B'
     }
     assert_dict(expected, actual)
 
@@ -196,3 +196,56 @@ def test_patch_match_venue(client):
         'venue_id': 11
     }))
     assert response.status == falcon.HTTP_OK
+
+def test_patch_match_teams(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'team1_id': 1,
+        'team2_id': 2
+    }))
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/match/35'),
+        'round': '3',
+        'matchtime': '2018-06-25T21:00:00+00:00',
+        'group': 'Group B',
+        'team1': {
+            'href': href('/team/1'),
+            'name': 'Egypt'
+        },
+        'team2': {
+            'href': href('/team/2'),
+            'name': 'Russia'
+        }
+    }
+    assert_dict(expected, actual)
+
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'team1_id': 5,
+        'team2_id': 7
+    }))
+    assert response.status == falcon.HTTP_OK
+
+def test_patch_match_result(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'result': '0-3'
+    }))
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/match/35'),
+        'round': '3',
+        'result': '0-3',
+        'group': 'Group B'
+    }
+    assert_dict(expected, actual)
+
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'result': None
+    }))
+    assert response.status == falcon.HTTP_OK
+
