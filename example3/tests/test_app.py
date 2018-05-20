@@ -201,27 +201,8 @@ def test_patch_match_unknown_venue(client):
     response = client.simulate_patch('/match/35', body = json.dumps({
         'venue_id': 24
     }))
-    assert response.status == falcon.HTTP_OK
+    assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 
-    actual = json.loads(response.text)
-    expected = {
-        'href': href('/match/35'),
-        'round': '3',
-        'matchtime': '2018-06-25T21:00:00+00:00',
-        'group': 'Group B',
-        'venue': {
-            'href': href('/venue/1'),
-            'name': 'Ekaterinburg Stadium'
-        }
-    }
-    assert_dict(expected, actual)
-
-    # response = client.simulate_patch('/match/35', body = json.dumps({
-    #     'venue_id': 11
-    # }))
-    # assert response.status == falcon.HTTP_OK
-
-#TODO also try with a team id that does not exist
 def test_patch_match_teams(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -253,7 +234,13 @@ def test_patch_match_teams(client):
     }))
     assert response.status == falcon.HTTP_OK
 
-#TODO also try patchin match with a wrong result format
+def test_patch_match_unknown_match(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'team1_id': 124
+    }))
+    assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+
 def test_patch_match_result(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -274,6 +261,13 @@ def test_patch_match_result(client):
         'result': None
     }))
     assert response.status == falcon.HTTP_OK
+
+def test_patch_match_incorrect_result(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'result': '0-X'
+    }))
+    assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 
 def test_patch_match_forbidden_field(client):
     # type: (testing.TestClient) -> None

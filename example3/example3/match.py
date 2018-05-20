@@ -1,10 +1,21 @@
+import re
 import falcon
-from marshmallow import fields, Schema, validates_schema, ValidationError
+from marshmallow import fields, Schema, validates, validates_schema, ValidationError
 from .marshmallow_util import URLFor
 from .model import DBMatch
 #TODO thsi is not normally useful (just need to use class names)
 from .team import TeamSchema
 from .venue import VenueSchema
+
+#TODO Make this mehtod a general utility
+def update_item_fields(item, keys, values):
+    # type: (dict, list, dict) -> bool
+    update = False
+    for key in keys:
+        if key in values.keys():
+            setattr(item, key, values[key])
+            update = True
+    return update
 
 class MatchSchema(Schema):
     id = fields.Integer()
@@ -22,8 +33,14 @@ class MatchPatchSchema(Schema):
     venue_id = fields.Integer()
     team1_id = fields.Integer()
     team2_id = fields.Integer()
-    #TODO Pattern to respect for result: XX-XX
     result = fields.String(allow_none=True)
+
+    RESULT_PATTERN = re.compile(r'[1-9]?[0-9]-[1-9]?[0-9]')
+
+    @validates('result')
+    def verify_result(self, value):
+        if value and not MatchPatchSchema.RESULT_PATTERN.match(value):
+            raise ValidationError('result must comply to format "0-0"', 'result')
 
     #TODO if it works fine probably make it global (AbstractSchema)
     @validates_schema(pass_original=True)
@@ -57,29 +74,11 @@ class Match(object):
         match = self._session.query(DBMatch).filter_by(id = id).one_or_none()
         if match:
             values = req.context['json']
-            print(values)
-            update = False
-            #TODO include it into _update() utility method
-            #TODO find a way to get the list of all fields in schema
-            for field in ('matchtime', 'venue_id', 'team1_id', 'team2_id', 'result'):
-#            for field in Match.patch_request_schema:
-                update = Match._update(match, field, values) or update
-            if update:
+            if update_item_fields(match, Match.patch_request_schema.fields, values):
                 self._session.add(match)
                 self._session.commit()
                 self._session.refresh(match)
-            else:
-                pass
             req.context['result'] = match
         else:
             resp.status = falcon.HTTP_NOT_FOUND
 
-    #TODO Make this mehtod a general utility
-    @staticmethod
-    def _update(item, key, values):
-        # type: (dict, str, dict) -> bool
-        if key in values.keys():
-            setattr(item, key, values[key])
-            return True
-        else:
-            return False
