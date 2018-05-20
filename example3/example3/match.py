@@ -1,5 +1,5 @@
 import falcon
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, validates_schema, ValidationError
 from .marshmallow_util import URLFor
 from .model import DBMatch
 #TODO thsi is not normally useful (just need to use class names)
@@ -24,6 +24,13 @@ class MatchPatchSchema(Schema):
     team2_id = fields.Integer()
     #TODO Pattern to respect for result: XX-XX
     result = fields.String(allow_none=True)
+
+    #TODO if it works fine probably make it global (AbstractSchema)
+    @validates_schema(pass_original=True)
+    def reject_extra_fields(self, data, original_data):
+        unknown = set(original_data) - set(self.fields)
+        if unknown:
+            raise ValidationError('Unknown field', unknown)
 
 class Matches(object):
     schema = MatchSchema(many = True)
@@ -50,6 +57,7 @@ class Match(object):
         match = self._session.query(DBMatch).filter_by(id = id).one_or_none()
         if match:
             values = req.context['json']
+            print(values)
             update = False
             #TODO include it into _update() utility method
             #TODO find a way to get the list of all fields in schema
@@ -60,6 +68,8 @@ class Match(object):
                 self._session.add(match)
                 self._session.commit()
                 self._session.refresh(match)
+            else:
+                pass
             req.context['result'] = match
         else:
             resp.status = falcon.HTTP_NOT_FOUND

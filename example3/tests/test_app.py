@@ -150,7 +150,6 @@ def test_get_match(client):
     }
     assert_dict(expected, actual)
 
-#TODO test patch one match for each field even forbidden fields, then several fields at once
 def test_patch_match_time(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -172,6 +171,7 @@ def test_patch_match_time(client):
     }))
     assert response.status == falcon.HTTP_OK
 
+#TODO also try with a venue id that does not exist
 def test_patch_match_venue(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -197,6 +197,7 @@ def test_patch_match_venue(client):
     }))
     assert response.status == falcon.HTTP_OK
 
+#TODO also try with a team id that does not exist
 def test_patch_match_teams(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -228,6 +229,7 @@ def test_patch_match_teams(client):
     }))
     assert response.status == falcon.HTTP_OK
 
+#TODO also try patchin match with a wrong result format
 def test_patch_match_result(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -249,3 +251,17 @@ def test_patch_match_result(client):
     }))
     assert response.status == falcon.HTTP_OK
 
+def test_patch_match_forbidden_field(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'group': 'Group C'
+    }))
+    print(response.text)
+    assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+    actual = json.loads(response.text)
+    expected = {
+        'description': json.dumps({
+            "group": ["Unknown field"]
+        })
+    }
+    assert_dict(expected, actual)
