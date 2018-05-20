@@ -171,7 +171,6 @@ def test_patch_match_time(client):
     }))
     assert response.status == falcon.HTTP_OK
 
-#TODO also try with a venue id that does not exist
 def test_patch_match_venue(client):
     # type: (testing.TestClient) -> None
     response = client.simulate_patch('/match/35', body = json.dumps({
@@ -196,6 +195,31 @@ def test_patch_match_venue(client):
         'venue_id': 11
     }))
     assert response.status == falcon.HTTP_OK
+
+def test_patch_match_unknown_venue(client):
+    # type: (testing.TestClient) -> None
+    response = client.simulate_patch('/match/35', body = json.dumps({
+        'venue_id': 24
+    }))
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/match/35'),
+        'round': '3',
+        'matchtime': '2018-06-25T21:00:00+00:00',
+        'group': 'Group B',
+        'venue': {
+            'href': href('/venue/1'),
+            'name': 'Ekaterinburg Stadium'
+        }
+    }
+    assert_dict(expected, actual)
+
+    # response = client.simulate_patch('/match/35', body = json.dumps({
+    #     'venue_id': 11
+    # }))
+    # assert response.status == falcon.HTTP_OK
 
 #TODO also try with a team id that does not exist
 def test_patch_match_teams(client):
