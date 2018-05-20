@@ -1,6 +1,6 @@
 import falcon
 import threading
-from marshmallow import fields
+from marshmallow import Schema, fields, validates_schema, ValidationError
 
 class ContextMiddleware(object):
     def __init__(self):
@@ -28,3 +28,11 @@ class URLFor(fields.FormattedString):
     def _serialize(self, value, key, obj):
         # type: (object, str, object) -> None
         return self._context.prefix + fields.FormattedString._serialize(self, value, key, obj)
+
+class StrictSchema(Schema):
+    @validates_schema(pass_original=True)
+    def reject_extra_fields(self, data, original_data):
+        unknown = set(original_data) - set(self.fields)
+        if unknown:
+            raise ValidationError('Unknown field', unknown)
+

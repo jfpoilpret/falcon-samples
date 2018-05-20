@@ -1,7 +1,7 @@
 import re
 import falcon
-from marshmallow import fields, Schema, validates, validates_schema, ValidationError
-from .marshmallow_util import URLFor
+from marshmallow import fields, Schema, validates, ValidationError
+from .marshmallow_util import URLFor, StrictSchema
 from .falcon_util import update_item_fields
 from .model import DBMatch
 #TODO thsi is not normally useful (just need to use class names)
@@ -19,7 +19,7 @@ class MatchSchema(Schema):
     group = fields.String()
     result = fields.String()
 
-class MatchPatchSchema(Schema):
+class MatchPatchSchema(StrictSchema):
     matchtime = fields.DateTime()
     venue_id = fields.Integer()
     team1_id = fields.Integer()
@@ -32,13 +32,6 @@ class MatchPatchSchema(Schema):
     def verify_result(self, value):
         if value and not MatchPatchSchema.RESULT_PATTERN.match(value):
             raise ValidationError('result must comply to format "0-0"', 'result')
-
-    #TODO if it works fine probably make it global (AbstractSchema)
-    @validates_schema(pass_original=True)
-    def reject_extra_fields(self, data, original_data):
-        unknown = set(original_data) - set(self.fields)
-        if unknown:
-            raise ValidationError('Unknown field', unknown)
 
 class Matches(object):
     schema = MatchSchema(many = True)
