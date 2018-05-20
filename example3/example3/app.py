@@ -37,6 +37,8 @@ class ExceptionHandler(object):
 
     def __call__(self, ex, req, resp, params):
         # type: (Exception, falcon.Request, falcon.response, dict) -> None
+        print(ex.__class__)
+        print(ex)
         raise HTTPError(self._status, self._title, str(ex))
 
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
@@ -45,6 +47,10 @@ api = application = API(middleware=[sql_middleware, context_middleware, Marshmal
 api.add_error_handler(Exception, ExceptionHandler(falcon.HTTP_INTERNAL_SERVER_ERROR, "Internal error"))
 api.add_error_handler(DBAPIError, ExceptionHandler(falcon.HTTP_INTERNAL_SERVER_ERROR, "Database error"))
 api.add_error_handler(IntegrityError, ExceptionHandler(falcon.HTTP_UNPROCESSABLE_ENTITY, "Integrity constraint error"))
+# We have to re-register the following handlers because although registered by default, 
+# they will never get called due to our Exception handler
+api.add_error_handler(falcon.HTTPError, api._http_error_handler)
+api.add_error_handler(falcon.HTTPStatus, api._http_status_handler)
 
 api.add_route('/team', Teams())
 api.add_route('/team/{id:int}', Team())
