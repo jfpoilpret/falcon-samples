@@ -300,3 +300,36 @@ def test_list_users(client):
     }
     assert_dict(expected, actual[0])
     
+def test_get_user_by_id(client):
+    response = client.simulate_get('/user/1')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/user/1'),
+        'id': 1,
+        'login': 'jfpoilpret',
+        'fullname': 'Jean-Francois Poilpret',
+        'admin': True,
+        'status': 'approved'
+    }
+    assert_dict(expected, actual)
+
+def test_get_user_by_login(client):
+    response = client.simulate_get('/user/jfpoilpret')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    expected = {
+        'href': href('/user/1'),
+        'id': 1,
+        'login': 'jfpoilpret',
+        'fullname': 'Jean-Francois Poilpret',
+        'admin': True,
+        'status': 'approved'
+    }
+    assert_dict(expected, actual)
+
+def test_get_user_by_bad_login(client):
+    response = client.simulate_get('/user/jfp')
+    assert response.status == falcon.HTTP_NOT_FOUND
