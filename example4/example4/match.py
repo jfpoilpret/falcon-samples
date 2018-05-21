@@ -1,5 +1,6 @@
 import re
 import falcon
+from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema, validates, ValidationError
 from .marshmallow_util import URLFor, StrictSchema
 from .falcon_util import update_item_fields
@@ -41,9 +42,14 @@ class Match(object):
     schema = MatchSchema()
     patch_request_schema = MatchPatchSchema()
 
+    #TODO attempt to have code completion on SQLAlchemy session: generalize it?
+    def session(self):
+        # type: () -> Session
+        return self._session
+
     def on_get(self, req, resp, id):
         # type: (falcon.Request, falcon.Response, int) -> None
-        match = self._session.query(DBMatch).filter_by(id = id).one_or_none()
+        match = self.session().query(DBMatch).filter_by(id = id).one_or_none()
         if match:
             req.context['result'] = match
         else:
@@ -51,13 +57,14 @@ class Match(object):
 
     def on_patch(self, req, resp, id):
         # type: (falcon.Request, falcon.Response, int) -> None
-        match = self._session.query(DBMatch).filter_by(id = id).one_or_none()
+        session = self.session()
+        match = session.query(DBMatch).filter_by(id = id).one_or_none()
         if match:
             values = req.context['json']
             if update_item_fields(match, Match.patch_request_schema.fields, values):
-                self._session.add(match)
-                self._session.commit()
-                self._session.refresh(match)
+                session.add(match)
+                session.commit()
+                session.refresh(match)
             req.context['result'] = match
         else:
             resp.status = falcon.HTTP_NOT_FOUND
