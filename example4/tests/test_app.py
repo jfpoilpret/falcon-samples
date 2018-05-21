@@ -283,3 +283,20 @@ def test_patch_match_forbidden_field(client):
         })
     }
     assert_dict(expected, actual)
+
+def test_list_users(client):
+    response = client.simulate_get('/user')
+    assert response.status == falcon.HTTP_OK
+
+    actual = json.loads(response.text)
+    assert len(actual) == 1
+    expected = {
+        'href': href('/user/1'),
+        'id': 1,
+        'login': 'jfpoilpret',
+        'fullname': 'Jean-Francois Poilpret',
+        'admin': True,
+        'status': 'approved'
+    }
+    assert_dict(expected, actual[0])
+    

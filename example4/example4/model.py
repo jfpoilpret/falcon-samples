@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Boolean, Enum, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 
 Base  = declarative_base()
@@ -52,6 +52,21 @@ class DBMatch(Base):
             self.id, self.matchtime.strftime('%d.%m.%Y %H:%M'), self.venue.name if self.venue else "unknown", self.venue_id,
             self.team1.name if self.team1 else 'unknown', self.team1_id, self.team2.name if self.team2 else 'unknown', self.team2_id,
             self.result or 'unknown')
+
+#TODO Add picture or gravatar?
+class DBUser(Base):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key = True)
+    login = Column(String, nullable = False, unique = True)
+    #TODO Change to binary (hashed)?
+    password = Column(String, nullable = False)
+    status = Column(Enum('pending', 'approved', 'suspended'))
+    admin = Column(Boolean, nullable = False, default = False)
+    fullname = Column(String, nullable = False, unique = True)
+    email = Column(String, unique = True)
+    creation = Column(DateTime, nullable = False)
+    connection = Column(DateTime)
 
 # Utility methods to create/drop DB schema from ORM mappings
 def create_db(engine):

@@ -13,6 +13,7 @@ from .model import create_db, drop_db
 from .team import Team, Teams
 from .venue import Venue, Venues
 from .match import Match, Matches
+from .user import Users
 
 from .initdb import init_db
 
@@ -46,3 +47,4 @@ api.add_route('/venue', Venues())
 api.add_route('/venue/{id:int}', Venue())
 api.add_route('/match', Matches())
 api.add_route('/match/{id:int}', Match())
+api.add_route('/user', Users())

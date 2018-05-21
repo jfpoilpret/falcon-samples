@@ -1,12 +1,13 @@
 import io
 from datetime import datetime
 
-from .model import DBTeam, DBVenue, DBMatch
+from .model import DBTeam, DBVenue, DBMatch, DBUser
 
 def init_db(session):
     init_teams(session)
     init_venues(session)
     init_matches(session)
+    init_users(session)
 
 def init_teams(session):
     with io.open('example4/data/teams.txt') as f:
@@ -21,6 +22,32 @@ def init_venues(session):
             name = line[:-1]
             session.add(DBVenue(name = name))
     session.commit()
+
+    # id = Column(Integer, primary_key = True)
+    # login = Column(String, nullable = False, unique = True)
+    # #TODO Change to binary (hashed)?
+    # password = Column(String, nullable = False)
+    # status = Column(Enum('pending', 'approved', 'suspended'))
+    # admin = Column(Boolean, nullable = False, default = False)
+    # fullname = Column(String, nullable = False, unique = True)
+    # email = Column(String, unique = True)
+    # creation = Column(DateTime, nullable = False)
+    # connection = Column(DateTime)
+
+def init_users(session):
+    with io.open('example4/data/users.txt') as f:
+        for line in f:
+            fields = line[:-1].split('\t')
+            user = DBUser(  login = fields[0],
+                            password = fields[1],
+                            status = fields[2],
+                            admin = fields[3].lower() in ('yes', 'true', '1'),
+                            fullname = fields[4],
+                            email = fields[5],
+                            creation = datetime.strptime(fields[6], '%d/%m/%Y %H:%M'))
+            session.add(user)
+    session.commit()
+    pass
 
 #FIXME fix TZ (Moscow) to UTC, so that we use a common time reference!
 def init_matches(session):
