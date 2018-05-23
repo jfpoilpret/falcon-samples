@@ -13,6 +13,7 @@ Prepare a virtual environment for the project sample:
 	pip3 install falcon
 	pip3 install falcon-marshmallow
 	pip3 install sqlalchemy
+	pip3 install falcon-auth
 
 Also install useful tools during project development:
 
