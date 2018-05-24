@@ -2,8 +2,8 @@ import re
 import falcon
 from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema, validates, ValidationError
-from .marshmallow_util import URLFor, StrictSchema
-from .falcon_util import update_item_fields
+from .utils.marshmallow_util import URLFor, StrictSchema
+from .utils.falcon_util import update_item_fields
 from .model import DBMatch
 
 class MatchSchema(Schema):

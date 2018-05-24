@@ -31,5 +31,6 @@
         "TODO",
         "FIXME"
     ],
-	"editor.insertSpaces": false
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false
 }

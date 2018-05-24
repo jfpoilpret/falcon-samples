@@ -1,6 +1,6 @@
 import falcon
 from marshmallow import fields, Schema
-from .marshmallow_util import URLFor
+from .utils.marshmallow_util import URLFor
 from .model import DBTeam
 
 class TeamSchema(Schema):

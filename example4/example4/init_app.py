@@ -1,9 +1,9 @@
 import os
 from sqlalchemy import create_engine
 
-from .sqlalchemy import SqlAlchemy
+from .utils.sqlalchemy_util import SqlAlchemy
 from .model import create_db, drop_db
-from .auth import Authenticator
+from .utils.auth import Authenticator
 from .initdb import init_db
 
 # Create SQLAlchemy engine

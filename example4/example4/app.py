@@ -4,10 +4,12 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from falcon_auth import FalconAuthMiddleware, TokenAuthBackend
 from falcon_marshmallow import Marshmallow
-from .falcon_util import ExceptionHandler
+from .utils.falcon_util import ExceptionHandler
 
-from .marshmallow_util import context_middleware
-from .init_app import sql_middleware, authenticator
+from .utils.auth import Authenticator
+from .utils.marshmallow_util import context_middleware
+from .init_app import sql_middleware
+
 from .team import Team, Teams
 from .venue import Venue, Venues
 from .match import Match, Matches
@@ -15,7 +17,7 @@ from .user import User, Users
 from .token import Token
 
 # Create default Token Auth backend
-backend = TokenAuthBackend(authenticator)
+backend = TokenAuthBackend(Authenticator.instance)
 
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
 api = application = API(middleware=[sql_middleware, FalconAuthMiddleware(backend), context_middleware, Marshmallow()])
