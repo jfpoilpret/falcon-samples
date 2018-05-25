@@ -17,13 +17,9 @@ class SqlAlchemy(object):
 		resource._session = self.new_session()
 
 	def process_response(self, req, resp, resource, req_succeeded):
-		print('SqlAlchemy.process_response() #1')
 		if req_succeeded:
-			print('SqlAlchemy.process_response() #2')
 			resource._session.commit()
-		print('SqlAlchemy.process_response() #3')
 		self.delete_session()
-		print('SqlAlchemy.process_response() #4')
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):

@@ -11,8 +11,6 @@ class ContextMiddleware(object):
 
     def process_request(self, req, resp):
         # type: (falcon.Request, falcon.Response) -> None
-        print('uri = %s' % req.uri)
-        print('prefix = %s' % req.prefix)
         self._context.uri = req.uri
         self._context.prefix = req.prefix
 
@@ -35,4 +33,3 @@ class StrictSchema(Schema):
         unknown = set(original_data) - set(self.fields)
         if unknown:
             raise ValidationError('Unknown field', unknown)
-

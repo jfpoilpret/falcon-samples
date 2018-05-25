@@ -13,11 +13,8 @@ class Token(object):
 	}
 
 	def on_get(self, req, resp):
-		print('Token.on_get() #1')
 		token, expiry = Authenticator.instance.new_token(req.context['user'])
-		print('Token.on_get() #2')
 		req.context['result'] = {
 			'token': token,
 			'expiry': expiry
 		}
-		print('Token.on_get() #3')

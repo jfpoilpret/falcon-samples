@@ -14,7 +14,7 @@ def href(path):
 def client():
 	# type: () -> testing.TestClient
 	client = testing.TestClient(api)
-	#TODO authenticate admin
+	# authenticate admin
 	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token

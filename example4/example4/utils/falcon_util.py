@@ -17,7 +17,5 @@ class ExceptionHandler(object):
 
     def __call__(self, ex, req, resp, params):
         # type: (Exception, falcon.Request, falcon.response, dict) -> None
-        print(ex.__class__)
-        print(ex)
         raise HTTPError(self._status, self._title, str(ex))
 
