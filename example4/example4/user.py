@@ -18,6 +18,14 @@ class UserSchema(StrictSchema):
     creation = fields.DateTime()
     connection = fields.DateTime()
 
+class UserPatchSchema(StrictSchema):
+    login = fields.String()
+    password = fields.String()
+    status = fields.String()
+    admin = fields.Boolean()
+    fullname = fields.String()
+    email = fields.Email()
+
 class Users(object):
     schema = UserSchema(many = True)
 
@@ -30,12 +38,15 @@ class Users(object):
         # type: (falcon.Request, falcon.Response) -> None
         req.context['result'] = self.session().query(DBUser).all()
     
+	#TODO no authentication required (user registration)
     def on_post(self, req, resp):
         # type: (falcon.Request, falcon.Response) -> None
+		#TODO
         pass
 
 class User(object):
     get_schema = UserSchema()
+	patch_request_schema = UserPatchSchema()
 
     def session(self):
         """ :type: sqlalchemy.orm.Session"""
@@ -53,5 +64,9 @@ class User(object):
         else:
             resp.status = falcon.HTTP_NOT_FOUND
 
+	#TODO patch (some fields for admin only, some field for user themselves)
+    def on_patch(self, req, resp, id_or_name):
+		pass
+		
     def get_user(self, login):
         return self.session().query(DBUser).filter_by(login = login).one_or_none
