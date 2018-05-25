@@ -57,6 +57,9 @@ class Match(object):
 
     def on_patch(self, req, resp, id):
         # type: (falcon.Request, falcon.Response, int) -> None
+		if not req.context['user'].admin:
+			resp.status = falcon.HTTP_FORBIDDEN
+			return
         session = self.session()
         match = session.query(DBMatch).filter_by(id = id).one_or_none()
         if match:
