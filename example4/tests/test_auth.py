@@ -42,8 +42,16 @@ def test_get_token_good_credentials(client):
 	actual = json.loads(response.text)
 	assert 'token' in actual
 	assert actual['token']
+	# check expiry date
 	assert 'expiry' in actual
-	#TODO check expiry date
+	# remove timezone
+	expiry = actual['expiry'][:-6]
+	# remove microseconds
+	if expiry.index('.') > 0:
+		expiry = expiry[:expiry.index('.')]
+	expiry = datetime.strptime(expiry, '%Y-%m-%dT%H:%M:%S')
+	delta = expiry - datetime.now()
+	assert 86350 < delta.total_seconds() < 86450
 
 def test_other_resource_basic_credentials(client):
 	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
