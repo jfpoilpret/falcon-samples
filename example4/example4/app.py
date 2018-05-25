@@ -5,7 +5,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from falcon_auth import FalconAuthMiddleware, TokenAuthBackend
 from falcon_marshmallow import Marshmallow
-from .utils.falcon_util import ExceptionHandler
+from .utils.falcon_util import ExceptionHandler, LoggingMiddleware
 
 from .utils.auth import Authenticator
 from .utils.marshmallow_util import context_middleware
@@ -20,8 +20,9 @@ from .token import Token
 # Create default Token Auth backend
 backend = TokenAuthBackend(Authenticator.instance)
 
+#TODO Add measurement middleware?
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
-api = application = API(middleware=[sql_middleware, FalconAuthMiddleware(backend), context_middleware, Marshmallow()])
+api = application = API(middleware=[LoggingMiddleware(), sql_middleware, FalconAuthMiddleware(backend), context_middleware, Marshmallow()])
 
 api.add_error_handler(Exception, ExceptionHandler(falcon.HTTP_INTERNAL_SERVER_ERROR, "Internal error"))
 api.add_error_handler(DBAPIError, ExceptionHandler(falcon.HTTP_INTERNAL_SERVER_ERROR, "Database error"))

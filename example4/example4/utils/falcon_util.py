@@ -1,5 +1,5 @@
 import logging
-from falcon import HTTPError
+from falcon import HTTPError, Request, Response
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,24 @@ class ExceptionHandler(object):
 		self._title = title
 
 	def __call__(self, ex, req, resp, params):
-		# type: (Exception, falcon.Request, falcon.response, dict) -> None
+		# type: (Exception, Request, response, dict) -> None
 		logger.warning('Exception occurred on request %s %s', req.method, req.uri, exc_info = ex)
 		raise HTTPError(self._status, self._title, str(ex))
+
+class LoggingMiddleware(object):
+	def process_request(self, req, resp):
+		# type: (Request, Response) -> None
+		logger.debug('Received: %s %s', req.method, req.uri)
+
+	def process_resource(self, req, resp, resource, params):
+		# type: (Request, Response, object, dict) -> None
+		logger.debug('Dispatched: %s %s to %s', req.method, req.uri, resource.__class__.__name__)
+
+	def process_response(sel, req, resp, resource, req_succeeded):
+		# type: (Request, Response, object, bool) -> None
+		if 'user' in req.context:
+			user = req.context['user']
+			user = '%s (%d)' % (user.login, user.id)
+		else:
+			user = 'no user'
+		logger.debug('Response for: %s %s succeeded for %s', req.method, req.uri, 'succeeded' if req_succeeded else 'failed', user)
