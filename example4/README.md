@@ -14,6 +14,7 @@ Prepare a virtual environment for the project sample:
 	pip3 install falcon-marshmallow
 	pip3 install sqlalchemy
 	pip3 install falcon-auth
+	pip3 install pyyaml
 
 Also install useful tools during project development:
 
