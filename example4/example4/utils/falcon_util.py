@@ -1,4 +1,7 @@
+import logging
 from falcon import HTTPError
+
+logger = logging.getLogger(__name__)
 
 def update_item_fields(item, keys, values):
     # type: (dict, list, dict) -> bool
@@ -17,5 +20,6 @@ class ExceptionHandler(object):
 
     def __call__(self, ex, req, resp, params):
         # type: (Exception, falcon.Request, falcon.response, dict) -> None
+		logger.warning('Exception occurred on request %s %s', req.method, req.uri, exc_info = ex)
         raise HTTPError(self._status, self._title, str(ex))
 

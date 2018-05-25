@@ -1,6 +1,9 @@
+import logging
 import falcon
 import threading
 from marshmallow import Schema, fields, validates_schema, ValidationError
+
+logger = logging.getLogger(__name__)
 
 class ContextMiddleware(object):
     def __init__(self):
@@ -32,4 +35,5 @@ class StrictSchema(Schema):
     def reject_extra_fields(self, data, original_data):
         unknown = set(original_data) - set(self.fields)
         if unknown:
+			logger.info('Unknown field(s) %s in schema %s', str(unknown), self.__class__.__name__)
             raise ValidationError('Unknown field', unknown)

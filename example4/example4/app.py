@@ -1,3 +1,4 @@
+import logging
 import falcon
 from falcon import API, HTTPError
 from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -39,3 +40,5 @@ api.add_route('/match', Matches())
 api.add_route('/match/{id:int}', Match())
 api.add_route('/user', Users())
 api.add_route('/user/{id_or_name}', User())
+
+logging.getLogger(__name__).info('API service started.')
