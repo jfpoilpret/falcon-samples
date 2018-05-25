@@ -79,7 +79,19 @@ def test_other_resource_correct_token(client):
 	assert response.status == falcon.HTTP_OK
 	actual = json.loads(response.text)
 	token = actual['token']
-	response = client.simulate_get('/venue/5', headers = {
+	response = client.simulate_get('/user/1', headers = {
 		'Authorization': 'Token %s' % token
 	})
 	assert response.status == falcon.HTTP_OK
+	# Check last connection time
+	actual = json.loads(response.text)
+	assert 'connection' in actual
+	connection = actual['connection']
+	# remove timezone
+	connection = actual['connection'][:-6]
+	# remove microseconds
+	if connection.index('.') > 0:
+		connection = connection[:connection.index('.')]
+	connection = datetime.strptime(connection, '%Y-%m-%dT%H:%M:%S')
+	delta = datetime.now() - connection
+	assert 0 <= delta.total_seconds() < 20

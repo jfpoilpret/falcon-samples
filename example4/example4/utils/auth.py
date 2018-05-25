@@ -54,9 +54,9 @@ class Authenticator(object):
 					if user:
 						print('Authenticator.__call__(token) #9')
 						# log last connection time
-						# user.connection = datetime.now()
-						# session.add(user)
-						# session.commit()
+						user.connection = datetime.now()
+						session.add(user)
+						session.commit()
 						return user
 				finally:
 					pass
@@ -79,9 +79,9 @@ class Authenticator(object):
 			if user and user.password == password:
 				print('Authenticator.__call__(user, password) #4.1')
 				# log last connection time
-				# user.connection = datetime.now()
-				# session.add(user)
-				# session.commit()
+				user.connection = datetime.now()
+				session.add(user)
+				session.commit()
 				return user
 			#TODO log bad connection
 			print('Authenticator.__call__(user, password) #4.2')
