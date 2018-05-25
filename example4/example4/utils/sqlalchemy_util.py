@@ -1,6 +1,6 @@
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker, Session
 
 class SqlAlchemy(object):
 	def __init__(self, engine):
@@ -8,6 +8,7 @@ class SqlAlchemy(object):
 		self._session_holder = scoped_session(factory)
     
 	def new_session(self):
+		# type: () -> Session
 		return self._session_holder()
 
 	def delete_session(self):
