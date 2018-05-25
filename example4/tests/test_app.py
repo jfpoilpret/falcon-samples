@@ -4,7 +4,6 @@ from falcon import testing
 from falcon.testing import helpers
 import json
 import pytest
-from datetime import datetime
 
 from example4.app import api
 
