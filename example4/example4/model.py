@@ -68,6 +68,11 @@ class DBUser(Base):
 	creation = Column(DateTime, nullable = False)
 	connection = Column(DateTime)
 
+	def __repr__(self):
+		return 'User(id = %d, login = %s, fullname = %s, status = %s, admin = %s, creation = %s, connection = %s)' % (
+			self.id, self.login, self.fullname, self.status, str(self.admin), 
+			self.creation.strftime('%d.%m.%Y %H:%M'), self.connection.strftime('%d.%m.%Y %H:%M'))
+
 # Utility methods to create/drop DB schema from ORM mappings
 def create_db(engine):
 	metadata = DBTeam.metadata
