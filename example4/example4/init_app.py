@@ -24,12 +24,10 @@ if config.log_dateformat:
 	logging_args['datefmt'] = config.log_dateformat
 
 logging.basicConfig(**logging_args)
-#logging.basicConfig(filename = config.log_output, level = config.log_level)
 logger = logging.getLogger(__name__)
 
 # Create SQLAlchemy engine
 basedir = os.path.abspath(os.path.dirname(__file__))
-#database = 'sqlite:///' + os.path.join(basedir, 'data', 'data.sqlite')
 database = '%s:///%s' % (config.db_type, os.path.join(basedir, config.db_name))
 engine = create_engine(database)
 sql_middleware = SqlAlchemy(engine)
