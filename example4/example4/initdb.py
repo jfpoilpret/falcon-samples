@@ -23,17 +23,6 @@ def init_venues(session):
             session.add(DBVenue(name = name))
     session.commit()
 
-    # id = Column(Integer, primary_key = True)
-    # login = Column(String, nullable = False, unique = True)
-    # #TODO Change to binary (hashed)?
-    # password = Column(String, nullable = False)
-    # status = Column(Enum('pending', 'approved', 'suspended'))
-    # admin = Column(Boolean, nullable = False, default = False)
-    # fullname = Column(String, nullable = False, unique = True)
-    # email = Column(String, unique = True)
-    # creation = Column(DateTime, nullable = False)
-    # connection = Column(DateTime)
-
 def init_users(session):
     with io.open('example4/data/users.txt') as f:
         for line in f:
