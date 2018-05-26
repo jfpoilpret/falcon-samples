@@ -1,6 +1,7 @@
 import logging
 from uuid import uuid4
 from datetime import datetime, timedelta
+from .sqlalchemy_util import SqlAlchemy
 from ..model import DBUser
 
 logger = logging.getLogger(__name__)
@@ -9,6 +10,7 @@ class Authenticator(object):
 	instance = None
 
 	def __init__(self, sql_middleware, duration = 86400, reconduct = False):
+		# type: (SqlAlchemy, int, bool) -> None
 		self._sql_middleware = sql_middleware
 		self._duration = timedelta(seconds = duration)
 		self._reconduct = reconduct
@@ -56,6 +58,8 @@ class Authenticator(object):
 					user.connection = datetime.now()
 					session.add(user)
 					session.commit()
+					session.refresh(user)
+					session.expunge(user)
 					return user
 				logger.debug('token has no associated user: %s', token)
 			else:
@@ -76,6 +80,8 @@ class Authenticator(object):
 			user.connection = datetime.now()
 			session.add(user)
 			session.commit()
+			session.refresh(user)
+			session.expunge(user)
 			return user
 		# log bad connection
 		logger.info('Could not authenticate username %s', username)
