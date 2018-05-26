@@ -31,6 +31,10 @@ class Configuration(object):
 		return self._value('drop_db', False)
 
 	@property
+	def log_output(self):
+		return self._value('log_output')
+
+	@property
 	def log_level(self):
 		return self._get_level(self._value('log_level', 'INFO'))
 

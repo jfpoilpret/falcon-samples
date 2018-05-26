@@ -6,6 +6,7 @@ DEV:
   db_name: data/dev-data.sqlite
   drop_db: true
   log_level: DEBUG
+  log_output: dev.log
 
 TEST:
 
