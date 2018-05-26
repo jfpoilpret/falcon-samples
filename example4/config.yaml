@@ -1,0 +1,19 @@
+---
+# This file contains all available configurations. Only one configuration gets used at runtime.
+#TODO infer about geenric way (format string?) to define DB url
+DEV:
+  db_type: sqlite
+  db_name: data/dev-data.sqlite
+  drop_db: true
+  log_level: DEBUG
+
+TEST:
+
+
+TRAIN:
+
+
+PROD:
+
+
+...
