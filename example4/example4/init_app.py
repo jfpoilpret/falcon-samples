@@ -11,7 +11,20 @@ from .configuration import Configuration
 # Get configuration
 config = Configuration()
 
-logging.basicConfig(filename = '', level = config.log_level)
+logging_args = {
+	'level': config.log_level
+}
+if config.log_output:
+	logging_args['filename'] = config.log_output
+if config.log_format:
+	logging_args['format'] = config.log_format
+if config.log_style:
+	logging_args['style'] = config.log_style
+if config.log_dateformat:
+	logging_args['datefmt'] = config.log_dateformat
+
+logging.basicConfig(**logging_args)
+#logging.basicConfig(filename = config.log_output, level = config.log_level)
 logger = logging.getLogger(__name__)
 
 # Create SQLAlchemy engine

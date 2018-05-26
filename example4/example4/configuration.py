@@ -32,7 +32,19 @@ class Configuration(object):
 
 	@property
 	def log_output(self):
-		return self._value('log_output')
+		return self._value('log_output', 'logs')
+
+	@property
+	def log_format(self):
+		return self._value('log_format')
+
+	@property
+	def log_dateformat(self):
+		return self._value('log_dateformat')
+
+	@property
+	def log_style(self):
+		return self._value('log_style')
 
 	@property
 	def log_level(self):
