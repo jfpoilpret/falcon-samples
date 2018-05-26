@@ -25,7 +25,6 @@ def test_get_token_bad_login(client):
 	})
 	assert response.status == falcon.HTTP_UNAUTHORIZED
 
-
 def test_get_token_bad_password(client):
 	token = base64.b64encode('jfpoilpret:xxx'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
