@@ -1,6 +1,9 @@
-from sqlalchemy import event
+import logging
+from sqlalchemy import event, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker, Session
+
+logger = logging.getLogger(__name__)
 
 class SqlAlchemy(object):
 	def __init__(self, engine):
@@ -28,3 +31,18 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 	cursor.execute("PRAGMA foreign_keys=ON")
 	cursor.close()
     
+def debug_object_state(entity, msg):
+	inspector = inspect(entity)
+	if inspector.transient:
+		state = 'transient'
+	elif inspector.pending:
+		state = 'pending'
+	elif inspector.persistent:
+		state = 'persistent'
+	elif inspector.deleted:
+		state = 'deleted'
+	elif inspector.detached:
+		state = 'detached'
+	else:
+		state = 'unknown'
+	logger.debug('Object state: %s %s', msg, state)
