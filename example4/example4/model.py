@@ -54,6 +54,7 @@ class DBMatch(Base):
 			self.result or 'unknown')
 
 #TODO Add picture or gravatar?
+#TODO Add current score?
 class DBUser(Base):
 	__tablename__ = 'user'
 
@@ -73,6 +74,25 @@ class DBUser(Base):
 			self.id, self.login, self.fullname, self.status, str(self.admin), 
 			self.creation.strftime('%d.%m.%Y %H:%M'), self.connection.strftime('%d.%m.%Y %H:%M'))
 
+#TODO unique key on better+match
+class DBBet(Base):
+	__tablename__ = 'bet'
+
+	id = Column(Integer, primary_key = True)
+	bettime = Column(DateTime, nullable = False)
+	better_id = Column(Integer, ForeignKey('user.id'), nullable = False)
+	match_id = Column(Integer, ForeignKey('match.id'), nullable = False)
+
+	better = relationship(DBUser)
+	match = relationship(DBMatch)
+
+	result = Column(String)
+
+	def __repr__(self):
+		return 'Bet(id = %d, date = %s, user = %s (%d), match = %s-%s (%d), result = %s)' % (
+			self.id, self.bettime.strftime('%d.%m.%Y %H:%M'), self.user.login, self.better_id,
+			self.match.team1.name, self.match.team2.name, self.result or 'unknown')
+	
 # Utility methods to create/drop DB schema from ORM mappings
 def create_db(engine):
 	metadata = DBTeam.metadata
