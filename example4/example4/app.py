@@ -11,11 +11,11 @@ from .utils.auth import Authenticator
 from .utils.marshmallow_util import context_middleware
 from .init_app import sql_middleware
 
-from .team import Team, Teams
-from .venue import Venue, Venues
-from .match import Match, Matches
-from .user import User, Users
-from .token import Token
+from .resources.team import Team, Teams
+from .resources.venue import Venue, Venues
+from .resources.match import Match, Matches
+from .resources.user import User, Users
+from .resources.token import Token
 
 # Create default Token Auth backend
 backend = TokenAuthBackend(Authenticator.instance)

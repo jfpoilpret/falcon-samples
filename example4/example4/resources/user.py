@@ -1,9 +1,9 @@
 import falcon
 from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema
-from .utils.marshmallow_util import URLFor, StrictSchema
-from .utils.falcon_util import update_item_fields
-from .model import DBUser
+from ..utils.marshmallow_util import URLFor, StrictSchema
+from ..utils.falcon_util import update_item_fields
+from ..model import DBUser
 
 #TODO improve read/write fields, hide some field depending on who is authenticated
 class UserSchema(StrictSchema):

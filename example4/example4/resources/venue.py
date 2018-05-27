@@ -1,8 +1,8 @@
 import falcon
 from marshmallow import fields, Schema
 
-from .utils.marshmallow_util import URLFor
-from .model import DBVenue
+from ..utils.marshmallow_util import URLFor
+from ..model import DBVenue
 
 class VenueSchema(Schema):
 	id = fields.Integer()
