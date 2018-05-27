@@ -60,7 +60,6 @@ class DBUser(Base):
 
 	id = Column(Integer, primary_key = True)
 	login = Column(String, nullable = False, unique = True)
-	#TODO Change to binary (hashed)?
 	password = Column(String, nullable = False)
 	status = Column(Enum('pending', 'approved', 'suspended'))
 	admin = Column(Boolean, nullable = False, default = False)
