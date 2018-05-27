@@ -3,6 +3,7 @@ import os
 from sqlalchemy import create_engine
 
 from .utils.sqlalchemy_util import SqlAlchemy
+from .utils.timebase import TimeBase
 from .model import create_db, drop_db
 from .utils.auth import Authenticator
 from .initdb import init_db
@@ -44,5 +45,7 @@ if config.drop_db:
 	logger.debug('DB content initialized.')
 	sql_middleware.delete_session()
 
+# Create TimeBase service
+timebase = TimeBase()
 # Create basic authenticator for use with all Auth backend
-authenticator = Authenticator(sql_middleware)
+authenticator = Authenticator(timebase, sql_middleware)

@@ -1,3 +1,4 @@
+from datetime import datetime
 import base64
 import falcon
 from falcon import testing
@@ -9,6 +10,12 @@ from example4.app import api
 
 def href(path):
     return 'http://' + helpers.DEFAULT_HOST + path
+
+def json_to_datetime(dt):
+	dt = dt[:-6]
+	if dt.index('.') > 0:
+		dt = dt[:dt.index('.')]
+	return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
 
 @pytest.fixture
 def client():
@@ -32,6 +39,58 @@ def assert_dict(expected, actual):
 			assert_dict(value, actual[key])
 		else:
 			assert value == actual[key]
+
+def test_get_time(client):
+	response = client.simulate_get('/time')
+	assert response.status == falcon.HTTP_OK
+
+	actual = json.loads(response.text)
+	assert actual['delta'] == 0
+
+	now = json_to_datetime(actual['now'])
+	delta = now - datetime.now()
+	assert -2 < delta.total_seconds() < +2
+
+def test_patch_time_base(client):
+	base = '2018-01-01T14:30:00'
+	response = client.simulate_patch('/time', body = json.dumps({
+		'now': base
+	}))
+	base = datetime.strptime(base, '%Y-%m-%dT%H:%M:%S')
+	delta = base - datetime.now()
+	assert response.status == falcon.HTTP_OK
+
+	response = client.simulate_get('/time')
+	assert response.status == falcon.HTTP_OK
+	actual = json.loads(response.text)
+	assert -2 < actual['delta'] - delta.total_seconds() < 2
+
+	now = json_to_datetime(actual['now'])
+	delta = base - now
+	assert -2 < delta.total_seconds() < +2
+
+	response = client.simulate_delete('/time')
+	assert response.status == falcon.HTTP_OK
+
+def test_patch_time_delta(client):
+	base = datetime.strptime('2018-01-01T14:30:00', '%Y-%m-%dT%H:%M:%S')
+	delta = (base - datetime.now()).total_seconds()
+	response = client.simulate_patch('/time', body = json.dumps({
+		'delta': delta
+	}))
+	assert response.status == falcon.HTTP_OK
+
+	response = client.simulate_get('/time')
+	assert response.status == falcon.HTTP_OK
+	actual = json.loads(response.text)
+	assert -2 < actual['delta'] - delta < 2
+
+	now = json_to_datetime(actual['now'])
+	delta = base - now
+	assert -2 < delta.total_seconds() < +2
+
+	response = client.simulate_delete('/time')
+	assert response.status == falcon.HTTP_OK
 
 def test_list_teams(client):
 	response = client.simulate_get('/team')

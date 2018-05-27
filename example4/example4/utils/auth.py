@@ -3,6 +3,7 @@ from uuid import uuid4
 from hashlib import sha256
 from datetime import datetime, timedelta
 from .sqlalchemy_util import SqlAlchemy
+from .timebase import TimeBase
 from ..model import DBUser
 
 logger = logging.getLogger(__name__)
@@ -20,8 +21,9 @@ def verify_password(expected, actual):
 class Authenticator(object):
 	instance = None
 
-	def __init__(self, sql_middleware, duration = 86400, reconduct = False):
-		# type: (SqlAlchemy, int, bool) -> None
+	def __init__(self, timebase, sql_middleware, duration = 86400, reconduct = False):
+		# type: (TimeBase, SqlAlchemy, int, bool) -> None
+		self._timebase = timebase
 		self._sql_middleware = sql_middleware
 		self._duration = timedelta(seconds = duration)
 		self._reconduct = reconduct
@@ -66,7 +68,7 @@ class Authenticator(object):
 				if user:
 					logger.debug('token %s is for user %s', token, str(user))
 					# log last connection time
-					user.connection = datetime.now()
+					user.connection = self._timebase.now()
 					session.add(user)
 					session.commit()
 					session.refresh(user)
@@ -87,7 +89,7 @@ class Authenticator(object):
 		if user and user.status == 'approved' and verify_password(user.password, password):
 			logger.debug('User %s successfully authenticated', username)
 			# log last connection time
-			user.connection = datetime.now()
+			user.connection = self._timebase.now()
 			session.add(user)
 			session.commit()
 			session.refresh(user)

@@ -50,6 +50,10 @@ class Configuration(object):
 	def log_level(self):
 		return self._get_level(self._value('log_level', 'INFO'))
 
+	@property
+	def timebase_changes(self):
+		return self._value('timebase_changes', False)
+
 	def _value(self, key, default = None):
 		return self._config[key] if key in self._config else default
 	

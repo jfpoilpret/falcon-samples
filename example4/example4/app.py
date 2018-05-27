@@ -9,18 +9,18 @@ from .utils.falcon_util import ExceptionHandler, LoggingMiddleware
 
 from .utils.auth import Authenticator
 from .utils.marshmallow_util import context_middleware
-from .init_app import sql_middleware
+from .init_app import sql_middleware, config, timebase
 
 from .resources.team import Team, Teams
 from .resources.venue import Venue, Venues
 from .resources.match import Match, Matches
 from .resources.user import User, Users
 from .resources.token import Token
+from .resources.time import Time
 
 # Create default Token Auth backend
 backend = TokenAuthBackend(Authenticator.instance)
 
-#TODO Add measurement middleware?
 # Create Falcon API with proper middleware: Marshmallow (validation), SQLAlchemy (persistence)
 api = application = API(middleware=[LoggingMiddleware(), sql_middleware, FalconAuthMiddleware(backend), context_middleware, Marshmallow()])
 
@@ -32,6 +32,8 @@ api.add_error_handler(IntegrityError, ExceptionHandler(falcon.HTTP_UNPROCESSABLE
 api.add_error_handler(falcon.HTTPError, api._http_error_handler)
 api.add_error_handler(falcon.HTTPStatus, api._http_status_handler)
 
+if config.timebase_changes:
+	api.add_route('/time', Time(timebase))
 api.add_route('/token', Token())
 api.add_route('/team', Teams())
 api.add_route('/team/{id:int}', Team())
