@@ -8,6 +8,7 @@ import pytest
 from datetime import datetime
 
 from example4.app import api
+from example4.utils.auth import hash_password, verify_password
 
 @pytest.fixture
 def client():
@@ -94,3 +95,8 @@ def test_other_resource_correct_token(client):
 	connection = datetime.strptime(connection, '%Y-%m-%dT%H:%M:%S')
 	delta = datetime.now() - connection
 	assert 0 <= delta.total_seconds() < 20
+
+def test_password_hashing():
+	initial = hash_password('Z0rg1Ub!')
+	assert verify_password(initial, 'Z0rg1Ub!')
+	assert not verify_password(initial, 'Z0rg1Ub*!')

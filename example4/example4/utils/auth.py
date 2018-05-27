@@ -1,10 +1,21 @@
 import logging
 from uuid import uuid4
+from hashlib import sha256
 from datetime import datetime, timedelta
 from .sqlalchemy_util import SqlAlchemy
 from ..model import DBUser
 
 logger = logging.getLogger(__name__)
+
+# Got these 2 hash password functions from:
+# https://www.pythoncentral.io/hashing-strings-with-python/
+def hash_password(password):
+	salt = uuid4().hex
+	return sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
+
+def verify_password(expected, actual):
+	password, salt = expected.split(':')
+	return password == sha256(salt.encode() + actual.encode()).hexdigest()
 
 class Authenticator(object):
 	instance = None
@@ -73,8 +84,7 @@ class Authenticator(object):
 		logger.debug('authenticate_user_password(%s)', username)
 		session = self._sql_middleware.new_session()
 		user = session.query(DBUser).filter_by(login = username).one_or_none()
-		#TODO hash password to compare
-		if user and user.password == password and user.status == 'approved':
+		if user and user.status == 'approved' and verify_password(user.password, password):
 			logger.debug('User %s successfully authenticated', username)
 			# log last connection time
 			user.connection = datetime.now()
