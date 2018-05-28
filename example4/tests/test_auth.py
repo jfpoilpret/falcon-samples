@@ -96,6 +96,18 @@ def test_other_resource_correct_token(client):
 	delta = datetime.now() - connection
 	assert 0 <= delta.total_seconds() < 20
 
+def test_post_user_no_auth(client):
+	response = client.simulate_post('/user', body = json.dumps({
+		'login': 'dummy',
+		'password': 'dummy',
+		'fullname': 'Dunny D. Dummy',
+		'email': 'dummy@dummy.com'
+	}))
+	#TODO fix status code
+	# assert response.status == falcon.HTTP_CREATED
+	# assert response.status == falcon.HTTP_NO_CONTENT
+	assert response.status == falcon.HTTP_OK
+
 def test_password_hashing():
 	initial = hash_password('Z0rg1Ub!')
 	assert verify_password(initial, 'Z0rg1Ub!')

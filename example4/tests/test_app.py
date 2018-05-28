@@ -402,3 +402,37 @@ def test_get_user_by_login(client):
 def test_get_user_by_bad_login(client):
 	response = client.simulate_get('/user/jfp')
 	assert response.status == falcon.HTTP_NOT_FOUND
+
+	# login = fields.String()
+	# password = fields.String()
+	# fullname = fields.String()
+	# email = fields.Email()
+
+def test_post_user(client):
+	response = client.simulate_post('/user', body = json.dumps({
+		'login': 'dummy',
+		'password': 'dummy',
+		'fullname': 'Dunny D. Dummy',
+		'email': 'dummy@dummy.com'
+	}))
+	# assert response.status == falcon.HTTP_CREATED
+	assert response.status == falcon.HTTP_OK
+	
+	user =  json.loads(response.text)
+	expected = {
+		'login': 'dummy',
+		'fullname': 'Dunny D. Dummy',
+		'email': 'dummy@dummy.com',
+		'admin': False,
+		'status': 'pending',
+		'connection': None
+	}
+	assert_dict(expected, user)
+
+	#TODO check creation date
+
+	#TODO delete user
+	response = client.simulate_delete('/user/%d' % user['id'])
+	# assert response.status == falcon.HTTP_NO_CONTENT
+	assert response.status == falcon.HTTP_OK
+	

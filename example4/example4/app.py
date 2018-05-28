@@ -41,7 +41,7 @@ api.add_route('/venue', Venues())
 api.add_route('/venue/{id:int}', Venue())
 api.add_route('/match', Matches())
 api.add_route('/match/{id:int}', Match())
-api.add_route('/user', Users())
+api.add_route('/user', Users(timebase))
 api.add_route('/user/{id_or_name}', User())
 
 logging.getLogger(__name__).info('API service started.')

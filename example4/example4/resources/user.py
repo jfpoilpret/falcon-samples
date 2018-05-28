@@ -3,6 +3,8 @@ from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema
 from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
+from ..utils.timebase import TimeBase
+from ..utils.auth import hash_password
 from ..model import DBUser
 
 #TODO add bets href
@@ -22,6 +24,8 @@ class UserSchema(StrictSchema):
 class UserPostSchema(StrictSchema):
 	login = fields.String()
 	password = fields.String()
+	status = fields.String()
+	admin = fields.Boolean()
 	fullname = fields.String()
 	email = fields.Email()
 
@@ -34,6 +38,7 @@ class UserPatchSchema(StrictSchema):
 	email = fields.Email()
 
 class Users(object):
+	schema = UserSchema()
 	get_schema = UserSchema(many = True)
 	post_request_schema = UserPostSchema()
 
@@ -41,6 +46,10 @@ class Users(object):
 	auth = {
 		'exempt_methods': 'POST'
 	}
+
+	def __init__(self, timebase):
+		# type: (TimeBase) -> None
+		self._timebase = timebase
 
 	def session(self):
 		# type: () -> Session
@@ -50,14 +59,31 @@ class Users(object):
 		# type: (falcon.Request, falcon.Response) -> None
 		req.context['result'] = self.session().query(DBUser).all()
 
+	#TODO check who is creating user: self registration or admin
 	def on_post(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		#TODO
-		user = req.context['json']
+		user = DBUser(**req.context['json'])
+		user.password = hash_password(user.password)
+		user.creation = self._timebase.now()
+		if 'user' not in req.context.keys():
+			#TODO check that admin and status are not provided (forbidden for registration)
+			result = False
+			user.admin =  False
+			user.status = 'pending'
+		elif req.context['user'].admin:
+			result = True
+
+		else:
+			resp.status = falcon.HTTP_FORBIDDEN
+			return
 		self.session().add(user)
 		self.session().commit()
-		self.session().refresh()
-		pass
+		self.session().refresh(user)
+		if result:
+			req.context['result'] = user
+			resp.status = falcon.HTTP_CREATED
+		else:
+			resp.status = falcon.HTTP_NO_CONTENT
 
 class User(object):
 	get_schema = UserSchema()
@@ -81,6 +107,10 @@ class User(object):
 
 	#TODO patch (some fields for admin only, some field for user themselves)
 	def on_patch(self, req, resp, id_or_name):
+		pass
+
+	#TODO only admin can do
+	def on_delete(self, req, resp, id_or_name):
 		pass
 		
 	def get_user(self, login):
