@@ -34,7 +34,7 @@ class LoggingMiddleware(object):
 
 	def process_response(sel, req, resp, resource, req_succeeded):
 		# type: (Request, Response, object, bool) -> None
-		if 'user' in req.context:
+		if 'user' in req.context.keys():
 			user = req.context['user']
 			user = '%s (%d)' % (user.login, user.id)
 		else:
