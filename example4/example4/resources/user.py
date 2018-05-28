@@ -5,6 +5,7 @@ from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
 from ..model import DBUser
 
+#TODO add bets href
 #TODO improve read/write fields, hide some field depending on who is authenticated
 class UserSchema(StrictSchema):
 	id = fields.Integer()
@@ -18,6 +19,12 @@ class UserSchema(StrictSchema):
 	creation = fields.DateTime()
 	connection = fields.DateTime()
 
+class UserPostSchema(StrictSchema):
+	login = fields.String()
+	password = fields.String()
+	fullname = fields.String()
+	email = fields.Email()
+
 class UserPatchSchema(StrictSchema):
 	login = fields.String()
 	password = fields.String()
@@ -27,10 +34,15 @@ class UserPatchSchema(StrictSchema):
 	email = fields.Email()
 
 class Users(object):
-	schema = UserSchema(many = True)
+	get_schema = UserSchema(many = True)
+	post_request_schema = UserPostSchema()
+
+	# POST is used for self registration of new users
+	auth = {
+		'exempt_methods': 'POST'
+	}
 
 	def session(self):
-		""" :type: sqlalchemy.orm.Session"""
 		# type: () -> Session
 		return self._session
 
@@ -38,10 +50,13 @@ class Users(object):
 		# type: (falcon.Request, falcon.Response) -> None
 		req.context['result'] = self.session().query(DBUser).all()
 
-	#TODO no authentication required (user registration)
 	def on_post(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		#TODO
+		user = req.context['json']
+		self.session().add(user)
+		self.session().commit()
+		self.session().refresh()
 		pass
 
 class User(object):
