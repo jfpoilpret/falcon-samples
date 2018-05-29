@@ -39,4 +39,4 @@ class LoggingMiddleware(object):
 			user = '%s (%d)' % (user.login, user.id)
 		else:
 			user = 'no user'
-		logger.debug('Response for: %s %s succeeded for %s', req.method, req.uri, 'succeeded' if req_succeeded else 'failed', user)
+		logger.debug('Response for: %s %s %s for %s', req.method, req.uri, 'succeeded' if req_succeeded else 'failed', user)
