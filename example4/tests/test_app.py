@@ -436,3 +436,23 @@ def test_post_user(client):
 	response = client.simulate_delete('/user/%d' % user['id'])
 	assert response.status == falcon.HTTP_NO_CONTENT
 	
+def test_patch_user(client):
+	response = client.simulate_patch('/user/jfpoilpret', body = json.dumps({
+		'login': 'dummy',
+		'password': 'jfpjfp',
+		'fullname': 'Dunny D. Dummy',
+		'email': 'jfp@gmail.com',
+		'admin': True,
+		'status': 'approved'
+	}))
+	assert response.status == falcon.HTTP_OK
+	
+	user =  json.loads(response.text)
+	expected = {
+		'login': 'dummy',
+		'fullname': 'Dunny D. Dummy',
+		'email': 'jfp@gmail.com',
+		'admin': True,
+		'status': 'approved'
+	}
+	assert_dict(expected, user)

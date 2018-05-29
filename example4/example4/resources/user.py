@@ -76,7 +76,7 @@ class Users(object):
 		resp.status = falcon.HTTP_CREATED
 
 class User(object):
-	get_schema = UserSchema()
+	schema = UserSchema()
 	patch_request_schema = UserPatchSchema()
 
 	def session(self):
@@ -91,9 +91,36 @@ class User(object):
 		else:
 			resp.status = falcon.HTTP_NOT_FOUND
 
-	#TODO patch (some fields for admin only, some field for user themselves)
 	def on_patch(self, req, resp, id_or_name):
-		pass
+		# type: (falcon.Request, falcon.Response, int) -> None
+		# only admin or user can modify himself
+		user = self._load_user(id_or_name)
+		if not user:
+			resp.status = falcon.HTTP_NOT_FOUND
+			return
+		values = req.context['json']
+		if req.context['user'].admin:
+			# keep all fields
+			pass
+		elif req.context['user'].id == user.id:
+			# check only some fields (fullname, password) are patched
+			extra = values.keys() - ('fullname', 'password') 
+			if extra:
+				resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
+				#TODO pass extra information on fields that cannot be patched
+				return
+		else:
+			resp.status = falcon.HTTP_FORBIDDEN
+			return
+		# hash password if modified
+		if 'password' in values.keys():
+			values['password'] = hash_password(values['password'])
+		if update_item_fields(user, User.patch_request_schema.fields, values):
+			session = self.session()
+			session.add(user)
+			session.commit()
+			session.refresh(user)
+		req.context['result'] = user
 
 	def on_delete(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, str) -> None
