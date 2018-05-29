@@ -413,26 +413,26 @@ def test_post_user(client):
 		'login': 'dummy',
 		'password': 'dummy',
 		'fullname': 'Dunny D. Dummy',
-		'email': 'dummy@dummy.com'
+		'email': 'dummy@dummy.com',
+		'admin': True,
+		'status': 'approved'
 	}))
-	# assert response.status == falcon.HTTP_CREATED
-	assert response.status == falcon.HTTP_OK
+	assert response.status == falcon.HTTP_CREATED
 	
 	user =  json.loads(response.text)
 	expected = {
 		'login': 'dummy',
 		'fullname': 'Dunny D. Dummy',
 		'email': 'dummy@dummy.com',
-		'admin': False,
-		'status': 'pending',
+		'admin': True,
+		'status': 'approved',
 		'connection': None
 	}
 	assert_dict(expected, user)
 
 	#TODO check creation date
 
-	#TODO delete user
+	# delete user
 	response = client.simulate_delete('/user/%d' % user['id'])
-	# assert response.status == falcon.HTTP_NO_CONTENT
-	assert response.status == falcon.HTTP_OK
+	assert response.status == falcon.HTTP_NO_CONTENT
 	
