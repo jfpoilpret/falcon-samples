@@ -55,6 +55,7 @@ class DBMatch(Base):
 
 #TODO Add picture or gravatar?
 #TODO Add current score?
+#TODO make email the login? more logical!
 class DBUser(Base):
 	__tablename__ = 'user'
 
