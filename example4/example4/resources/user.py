@@ -5,7 +5,7 @@ from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
 from ..utils.timebase import TimeBase
 from ..utils.auth import hash_password
-from ..model import DBUser
+from ..model import DBBet, DBMatch, DBUser
 
 #TODO add bets href
 #TODO improve read/write fields, hide some field depending on who is authenticated
@@ -72,6 +72,12 @@ class Users(object):
 		self.session().add(user)
 		self.session().commit()
 		self.session().refresh(user)
+		# create all bets for this user
+		matches = self.session().query(DBMatch.id).all()
+		for match in matches:
+			bet = DBBet(better_id = user.id, match_id = match.id)
+			self.session().add(bet)
+			self.session().commit()
 		req.context['result'] = user
 		resp.status = falcon.HTTP_CREATED
 
@@ -131,6 +137,8 @@ class User(object):
 		if not user:
 			resp.status = falcon.HTTP_NOT_FOUND
 			return
+		# delete all bets
+		self.session().query(DBBet).filter_by(better_id = user.id).delete(synchronize_session = False)
 		self.session().delete(user)
 		self.session().commit()
 		resp.status = falcon.HTTP_NO_CONTENT

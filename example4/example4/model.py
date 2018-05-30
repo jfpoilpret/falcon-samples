@@ -79,7 +79,7 @@ class DBBet(Base):
 	__tablename__ = 'bet'
 
 	id = Column(Integer, primary_key = True)
-	bettime = Column(DateTime, nullable = False)
+	bettime = Column(DateTime)
 	better_id = Column(Integer, ForeignKey('user.id'), nullable = False)
 	match_id = Column(Integer, ForeignKey('match.id'), nullable = False)
 
