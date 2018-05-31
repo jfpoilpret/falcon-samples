@@ -432,6 +432,13 @@ def test_post_user(client):
 
 	#TODO check creation date
 
+	# Check bets
+	response = client.simulate_get('/user/%d/bets' % user['id'])
+	assert response.status == falcon.HTTP_OK
+	bets = json.loads(response.text)
+	assert len(bets) == 64
+	#TODO further checks all results empty, all matches concerned
+
 	# delete user
 	response = client.simulate_delete('/user/%d' % user['id'])
 	assert response.status == falcon.HTTP_NO_CONTENT
