@@ -14,7 +14,7 @@ from .init_app import sql_middleware, config, timebase
 from .resources.team import Team, Teams
 from .resources.venue import Venue, Venues
 from .resources.match import Match, Matches
-from .resources.bet import Bet, Bets
+from .resources.bet import Bets
 from .resources.user import User, Users
 from .resources.token import Token
 from .resources.time import Time
@@ -44,7 +44,6 @@ api.add_route('/match', Matches())
 api.add_route('/match/{id:int}', Match())
 api.add_route('/user', Users(timebase))
 api.add_route('/user/{id_or_name}', User())
-api.add_route('/user/{id_or_name}/bets', Bets())
-api.add_route('/bet/{id}', Bet(timebase))
+api.add_route('/bet', Bets(timebase))
 
 logging.getLogger(__name__).info('API service started.')

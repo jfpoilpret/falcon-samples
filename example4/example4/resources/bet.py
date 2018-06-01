@@ -6,40 +6,19 @@ from ..utils.falcon_util import update_item_fields
 from ..utils.timebase import TimeBase
 from ..model import DBBet, DBUser
 
-class BetSchema(StrictSchema):
+class BetSchema(Schema):
 	id = fields.Integer()
-	href = URLFor('/bet/{id}')
 	bettime = fields.DateTime()
 	match = fields.Nested('MatchSchema')
 	result = fields.String()
 
+class BetPatchSchema(StrictSchema):
+	id = fields.Integer()
+	result = fields.String()
+
 class Bets(object):
 	schema = BetSchema(many = True)
-
-	def session(self):
-		# type: () -> Session
-		return self._session
-
-	def on_get(self, req, resp, id_or_name):
-		# type: (falcon.Request, falcon.Response, str) -> None
-		user = self._load_user(id_or_name)
-		if not user:
-			resp.status = falcon.HTTP_NOT_FOUND
-			return
-		bets = self.session().query(DBBet).filter_by(better_id = user.id).all()
-		req.context['result'] = bets
-
-	#TODO Authorize multiple PATCH?
-
-	def _load_user(self, id_or_name):
-		# type: (str) -> DBUser
-		if id_or_name.isnumeric():
-			return self.session().query(DBUser).filter_by(id = int(id_or_name)).one_or_none()
-		else:
-			return self.session().query(DBUser).filter_by(login = id_or_name).one_or_none()
-
-class Bet(object):
-	schema = BetSchema()
+	patch_request_schema = BetPatchSchema(many = True)
 
 	def __init__(self, timebase):
 		# type: (TimeBase) -> None
@@ -49,24 +28,49 @@ class Bet(object):
 		# type: () -> Session
 		return self._session
 
-	def on_get(self, req, resp, id):
-		# type: (falcon.Request, falcon.Response, int) -> None
-		bet = self.session().query(DBBet).filter_by(id = id).one_or_none()
-		if not bet:
-			resp.status = falcon.HTTP_NOT_FOUND
-			return
-		if bet.better_id != req.context['user'].id:
+	def on_get(self, req, resp):
+		# type: (falcon.Request, falcon.Response) -> None
+		user = req.context['user']
+		bets = self.session().query(DBBet).filter_by(better_id = user.id).all()
+		req.context['result'] = bets
+
+	def on_patch(self, req, resp):
+		# type: (falcon.Request, falcon.Response) -> None
+		new_bets = {bet['id']: bet['result'] for bet in req.context['json']}
+		user = req.context['user']
+		bets = self.session().query(DBBet).filter_by(better_id = user.id).all()
+		bets = {bet.id: bet for bet in bets}
+
+		# check all bets to be patched belong to current user
+		bad_ids = new_bets.keys() - bets.keys()
+		if bad_ids:
 			resp.status = falcon.HTTP_FORBIDDEN
+			#TODO add error message?
 			return
-		req.context['result'] = bet
+		# filter bets to be changed
+		patched_bets = {id: bet for id, bet in bets.items() if id in new_bets.keys()}
 
-	def on_patch(self, req, resp, id):
-		# type: (falcon.Request, falcon.Response, int) -> None
-		pass
-
-	def _load_user(self, id_or_name):
-		# type: (str) -> DBUser
-		if id_or_name.isnumeric():
-			return self.session().query(DBUser).filter_by(id = int(id_or_name)).one_or_none()
-		else:
-			return self.session().query(DBUser).filter_by(login = id_or_name).one_or_none()
+		# ensure all bets are for future matches!
+		now = self._timebase.now()
+		past_match_ids = [id for id, bet in patched_bets.items() if bet.match.matchtime <= now]
+		if past_match_ids:
+			resp.status = falcon.HTTP_FORBIDDEN
+			#TODO add error message?
+			return
+			
+		# ensure match is already known (teams not null)
+		unknown_match_ids = [id for id, bet in patched_bets.items() if bet.match.team1_id is None or bet.match.team2_id is None]
+		if unknown_match_ids:
+			resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
+			#TODO add error message?
+			return
+		
+		# update patched bets
+		session = self.session()
+		for id, bet in patched_bets.items():
+			bet.bettime = now
+			bet.result = new_bets[id]
+			session.add(bet)
+			session.commit()
+			session.refresh(bet)
+		req.context['result'] = patched_bets.values()

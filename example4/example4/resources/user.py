@@ -7,7 +7,6 @@ from ..utils.timebase import TimeBase
 from ..utils.auth import hash_password
 from ..model import DBBet, DBMatch, DBUser
 
-#TODO add bets href
 #TODO improve read/write fields, hide some field depending on who is authenticated
 class UserSchema(StrictSchema):
 	id = fields.Integer()
@@ -18,6 +17,7 @@ class UserSchema(StrictSchema):
 	admin = fields.Boolean()
 	fullname = fields.String()
 	email = fields.Email()
+	bets = URLFor('/bets')
 	creation = fields.DateTime()
 	connection = fields.DateTime()
 
@@ -43,6 +43,7 @@ class Users(object):
 	post_request_schema = UserPostSchema()
 
 	#TODO implement self-registration POST later; for the moment, jus allow admin to create users
+	#NOTE it is probably better toc reate a new resource "regitration" specifically for anonymous users
 	# # POST is used for self registration of new users
 	# auth = {
 	# 	'exempt_methods': 'POST'
@@ -81,6 +82,7 @@ class Users(object):
 		req.context['result'] = user
 		resp.status = falcon.HTTP_CREATED
 
+#TODO missing method to get oneself?
 class User(object):
 	schema = UserSchema()
 	patch_request_schema = UserPatchSchema()
