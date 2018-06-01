@@ -106,6 +106,7 @@ def test_post_user_no_auth(client):
 	#TODO fix status code
 	# assert response.status == falcon.HTTP_CREATED
 	# assert response.status == falcon.HTTP_NO_CONTENT
+	#FIXME This test should FAIL currently as no auth is forbidden!
 	assert response.status == falcon.HTTP_OK
 
 def test_password_hashing():

@@ -5,17 +5,9 @@ from falcon import testing
 from falcon.testing import helpers
 import json
 import pytest
+from .utils import href, json_to_datetime, assert_dict
 
 from example4.app import api
-
-def href(path):
-    return 'http://' + helpers.DEFAULT_HOST + path
-
-def json_to_datetime(dt):
-	dt = dt[:-6]
-	if dt.index('.') > 0:
-		dt = dt[:dt.index('.')]
-	return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
 
 @pytest.fixture
 def client():
@@ -31,14 +23,6 @@ def client():
 		'Authorization': 'Token %s' % token
 	}
 	return client
-
-def assert_dict(expected, actual):
-	for key, value in expected.items():
-		print("assert_dict() %s %s" % (key, str(value)))
-		if isinstance(value, dict):
-			assert_dict(value, actual[key])
-		else:
-			assert value == actual[key]
 
 def test_get_time(client):
 	response = client.simulate_get('/time')
