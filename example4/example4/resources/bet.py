@@ -8,6 +8,7 @@ from ..model import DBBet, DBUser
 
 class BetSchema(Schema):
 	id = fields.Integer()
+	better = fields.Nested('UserSchema')
 	bettime = fields.DateTime()
 	match = fields.Nested('MatchSchema')
 	result = fields.String()
