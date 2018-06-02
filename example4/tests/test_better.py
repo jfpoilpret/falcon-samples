@@ -37,7 +37,10 @@ def new_user(admin_client):
 		'email': 'john@doe.com'
 	}))
 	assert response.status == falcon.HTTP_CREATED
-	return json.loads(response.text)
+	user = json.loads(response.text)
+	yield user
+	# delete user before next test
+	response = admin_client.simulate_delete('/user/%d' % user['id'])
 
 @pytest.fixture
 def better_client(new_user):

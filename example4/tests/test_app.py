@@ -435,3 +435,13 @@ def test_patch_user(client):
 		'status': 'approved'
 	}
 	assert_dict(expected, user)
+
+	response = client.simulate_patch('/user/dummy', body = json.dumps({
+		'login': 'jfpoilpret',
+		'password': 'jfp',
+		'fullname': 'Jean-Francois Poilpret',
+		'email': 'jfpoilpret@gmail.com',
+		'admin': True,
+		'status': 'approved'
+	}))
+	assert response.status == falcon.HTTP_OK
