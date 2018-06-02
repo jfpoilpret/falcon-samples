@@ -1,10 +1,14 @@
 import falcon
+import logging
+import re
 from sqlalchemy.orm.session import Session
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, validates, ValidationError
 from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
 from ..utils.timebase import TimeBase
 from ..model import DBBet, DBUser
+
+logger = logging.getLogger(__name__)
 
 class BetSchema(Schema):
 	id = fields.Integer()
@@ -16,6 +20,14 @@ class BetSchema(Schema):
 class BetPatchSchema(StrictSchema):
 	id = fields.Integer()
 	result = fields.String()
+
+	RESULT_PATTERN = re.compile(r'[1-9]?[0-9]-[1-9]?[0-9]')
+
+	@validates('result')
+	def verify_result(self, value):
+		if value and not BetPatchSchema.RESULT_PATTERN.match(value):
+			logger.info('BetPatchSchema bad \'result\' format for %s', value)
+			raise ValidationError('result must comply to format "0-0"', 'result')
 
 class Bets(object):
 	schema = BetSchema(many = True)

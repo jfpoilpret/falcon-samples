@@ -117,7 +117,10 @@ def test_patch_bet_past_match(admin_client, better_client):
 		'result': '2-1'
 	}]))
 	assert response.status == falcon.HTTP_FORBIDDEN
-	
+
+	response = admin_client.simulate_delete('/time')
+	assert response.status == falcon.HTTP_OK
+
 def test_patch_bet_unknown_match(better_client):
 	# type: (testing.TestClient) -> None
 	response = better_client.simulate_get('/bet')
@@ -127,6 +130,18 @@ def test_patch_bet_unknown_match(better_client):
 	response = better_client.simulate_patch('/bet', body = json.dumps([{
 		'id': id,
 		'result': '2-1'
+	}]))
+	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+	
+def test_patch_bet_bad_result(better_client):
+	# type: (testing.TestClient) -> None
+	response = better_client.simulate_get('/bet')
+	bets = json.loads(response.text)
+	# Take the first match in 1st phase
+	id, match = [(bet['id'], bet['match']) for bet in bets if bet['match']['round'] == '1'][0]
+	response = better_client.simulate_patch('/bet', body = json.dumps([{
+		'id': id,
+		'result': '2-X'
 	}]))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 	
