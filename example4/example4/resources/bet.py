@@ -17,15 +17,15 @@ class BetSchema(Schema):
 	match = fields.Nested('MatchSchema')
 	result = fields.String()
 
+RESULT_PATTERN = re.compile(r'([1-9]?[0-9])-([1-9]?[0-9])')
+
 class BetPatchSchema(StrictSchema):
 	id = fields.Integer()
 	result = fields.String()
 
-	RESULT_PATTERN = re.compile(r'[1-9]?[0-9]-[1-9]?[0-9]')
-
 	@validates('result')
 	def verify_result(self, value):
-		if value and not BetPatchSchema.RESULT_PATTERN.match(value):
+		if value and not RESULT_PATTERN.match(value):
 			logger.info('BetPatchSchema bad \'result\' format for %s', value)
 			raise ValidationError('result must comply to format "0-0"', 'result')
 
@@ -83,6 +83,19 @@ class Bets(object):
 		for id, bet in patched_bets.items():
 			bet.bettime = now
 			bet.result = new_bets[id]
+			# calculate utility columns winner and goals_diff
+			result = RESULT_PATTERN.match(bet.result)
+			goals1 = int(result.group(1))
+			goals2 = int(result.group(2))
+			if goals1 > goals2:
+				bet.winner = 1
+				bet.goals_diff = goals1 - goals2
+			elif goals1 < goals2:
+				bet.winner = 2
+				bet.goals_diff = goals2 - goals1
+			else:
+				bet.winner = 0
+				bet.goals_diff = 0
 			session.add(bet)
 			session.commit()
 			session.refresh(bet)

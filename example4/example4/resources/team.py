@@ -3,14 +3,6 @@ from marshmallow import fields, Schema
 from ..utils.marshmallow_util import URLFor
 from ..model import DBTeam
 
-	# played = Column(Integer, nullable = false, default = 0)
-	# won = Column(Integer, nullable = false, default = 0)
-	# drawn = Column(Integer, nullable = false, default = 0)
-	# lost = Column(Integer, nullable = false, default = 0)
-	# goals_for = Column(Integer, nullable = false, default = 0)
-	# goals_against = Column(Integer, nullable = false, default = 0)
-	# points = Column(Integer, nullable = false, default = 0)
-
 class TeamSchema(Schema):
 	id = fields.Integer()
 	href = URLFor('/team/{id}')

@@ -95,6 +95,22 @@ class DBBet(Base):
 	match = relationship(DBMatch)
 
 	result = Column(String)
+	# The 3 next columns are internal ony, they are here to accelerate computation of user's score
+	# winner is either:
+	#	1 if result claims team1 is gonna win
+	#	2 if result claims team2 is gonna win
+	#	0 if result claims this will be a draw
+	#	None if result is None
+	winner = Column(Integer)
+	# goals_diff is the goal difference between winner and loser in result (always 0 for a draw)
+	goals_diff = Column(Integer)
+	# score indicates the amount scored by better on this single bet:
+	#	3 if result matches exact match result
+	#	2 if result matches winner and goals difference
+	#	1 if result matches winner
+	#	0 if result is wrong
+	#	None if result is None
+	score = Column(Integer)
 
 	def __repr__(self):
 		return 'Bet(id = %d, date = %s, user = %s (%d), match = %s-%s (%d), result = %s)' % (
