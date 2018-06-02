@@ -17,8 +17,16 @@ class DBTeam(Base):
 	name = Column(String, nullable = False, unique = True)
 	group = Column(String, nullable = False)
 
+	played = Column(Integer, nullable = False, default = 0)
+	won = Column(Integer, nullable = False, default = 0)
+	drawn = Column(Integer, nullable = False, default = 0)
+	lost = Column(Integer, nullable = False, default = 0)
+	goals_for = Column(Integer, nullable = False, default = 0)
+	goals_against = Column(Integer, nullable = False, default = 0)
+	points = Column(Integer, nullable = False, default = 0)
+
 	def __repr__(self):
-		return 'Team(id = %d, name = %s, group = %s)' % (self.id, self.name, self.group)
+		return 'Team(id = %d, name = %s, group = %s, points = %d)' % (self.id, self.name, self.group, self.points)
 
 #TODO Add picture, TZ, coordinates?
 class DBVenue(Base):

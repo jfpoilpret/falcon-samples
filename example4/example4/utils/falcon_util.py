@@ -8,8 +8,11 @@ def update_item_fields(item, keys, values):
 	update = False
 	for key in keys:
 		if key in values.keys():
-			setattr(item, key, values[key])
-			update = True
+			old_val = getattr(item, key, None)
+			new_val = values[key]
+			if old_val != new_val:
+				setattr(item, key, values[key])
+				update = True
 	return update
 
 class ExceptionHandler(object):

@@ -20,6 +20,8 @@ class MatchSchema(Schema):
 	group = fields.String()
 	result = fields.String()
 
+RESULT_PATTERN = re.compile(r'([1-9]?[0-9])-([1-9]?[0-9])')
+
 class MatchPatchSchema(StrictSchema):
 	matchtime = fields.DateTime()
 	venue_id = fields.Integer()
@@ -27,11 +29,9 @@ class MatchPatchSchema(StrictSchema):
 	team2_id = fields.Integer()
 	result = fields.String(allow_none=True)
 
-	RESULT_PATTERN = re.compile(r'[1-9]?[0-9]-[1-9]?[0-9]')
-
 	@validates('result')
 	def verify_result(self, value):
-		if value and not MatchPatchSchema.RESULT_PATTERN.match(value):
+		if value and not RESULT_PATTERN.match(value):
 			logger.info('MatchPatchSchema bad \'result\' format for %s', value)
 			raise ValidationError('result must comply to format "0-0"', 'result')
 
@@ -58,6 +58,7 @@ class Match(object):
 		else:
 			resp.status = falcon.HTTP_NOT_FOUND
 
+	#FIXME prevent setting result of future match!
 	def on_patch(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
 		if not req.context['user'].admin:
@@ -71,6 +72,28 @@ class Match(object):
 				session.add(match)
 				session.commit()
 				session.refresh(match)
+				# update team points if match is during rounds 1,2,3
+				if match.group in ['1', '2', '3']:
+					result = RESULT_PATTERN.match(match.result)
+					goals1 = int(result.group(1))
+					goals2 = int(result.group(2))
+					self._update_points(match.team1, goals1, goals2)
+					self._update_points(match.team2, goals2, goals1)
+					session.refresh(match)
 			req.context['result'] = match
 		else:
 			resp.status = falcon.HTTP_NOT_FOUND
+
+	def _update_points(self, team, goals_for, goals_against):
+		if goals_for > goals_against:
+			team.won = team.won + 1
+			team.points = team.points + 3
+		elif goals_for == goals_against:
+			team.drawn = team.drawn + 1
+			team.points = team.points + 1
+		else:
+			team.lost = team.lost + 1
+		team.goals_for = goals_for
+		team.goals_against = goals_against
+		self.session().add(team)
+		self.session().commit()
