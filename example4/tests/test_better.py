@@ -2,7 +2,6 @@ from datetime import datetime
 import base64
 import falcon
 from falcon import testing
-from falcon.testing import helpers
 import json
 import pytest
 from .utils import href, json_to_datetime, assert_dict
