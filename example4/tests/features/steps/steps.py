@@ -15,8 +15,9 @@ class UserClient(object):
 @given('system is ready')
 def start_system(context):
 	# type: (Context) -> None
-	from example4.app import api
-	context.api = api
+	# from example4.app import api
+	from example4.init_app import create_app
+	context.api = api = create_app()
 	client = testing.TestClient(api)
 	# authenticate admin
 	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')

@@ -18,6 +18,7 @@ def client():
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
+	assert response.status == falcon.HTTP_OK
 	token = json.loads(response.text)['token']
 	client._default_headers = {
 		'Authorization': 'Token %s' % token
