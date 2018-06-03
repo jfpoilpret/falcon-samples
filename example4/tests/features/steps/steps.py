@@ -101,13 +101,13 @@ def set_bets(context, user):
 		bet = find_match_in_bets(row['match'], row['round'], all_bets)
 		assert bet is not None
 		response = client.simulate_patch('/bet', body = json.dumps([{
-			'id': bet.id,
+			'id': bet['id'],
 			'result': row['result']
 		}]))
 		assert response.status == falcon.HTTP_OK
 
 @when('admin sets match results')
-def set_match_results(self, context):
+def set_match_results(context):
 	# type: (Context) -> None
 	client = context.admin
 	response = client.simulate_get('/match')
@@ -139,4 +139,7 @@ def check_user_score(context, user, score):
 	client = context.admin
 	response = client.simulate_get('/user/%s' % user)
 	assert response.status == falcon.HTTP_OK
-	assert json.loads(response.status)['score'] == score
+	the_user = json.loads(response.text)
+	print("actual score %d" % the_user['score'])
+	print("expected score %d" % score)
+	assert json.loads(response.text)['score'] == score
