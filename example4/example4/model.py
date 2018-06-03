@@ -65,9 +65,8 @@ class DBMatch(Base):
 			self.team1.name if self.team1 else 'unknown', self.team1_id, self.team2.name if self.team2 else 'unknown', self.team2_id,
 			self.result or 'unknown')
 
-#TODO Add picture or gravatar?
-#TODO Add current score?
 #TODO make email the login? more logical!
+#TODO Add picture or gravatar?
 class DBUser(Base):
 	__tablename__ = 'user'
 
