@@ -2,6 +2,7 @@ import logging
 import re
 import falcon
 from sqlalchemy import inspect, or_
+from sqlalchemy.sql import func, select
 from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema, validates, ValidationError
 from ..utils.marshmallow_util import URLFor, StrictSchema
@@ -143,7 +144,6 @@ class Match(object):
 		goals_diff = abs(goals_diff)
 		# batch update of all bets for this match
 		bets = inspect(DBBet).local_table
-		users = inspect(DBUser).local_table
 		connection = self.session().connection()
 		# Perform updates for exact results (score 3)
 		update = bets.update().where(bets.c.match_id == match.id).\
@@ -170,5 +170,14 @@ class Match(object):
 		connection.execute(update)
 
 	def _update_users_score(self):
-		#TODO
-		pass
+		#TODO limit update to users with bets for the current updated match (other users shall not change)
+		# batch update of all users 
+		bets = inspect(DBBet).local_table
+		users = inspect(DBUser).local_table
+		connection = self.session().connection()
+		select_score = select([func.sum(bets.c.score)]).\
+			where(bets.c.better_id == users.c.id).\
+			where(bets.c.score != None)
+		# this may lead to None instead of 0 if there are no bets with a valid score
+		update = users.update().values(score = select_score)
+		connection.execute(update)

@@ -18,6 +18,7 @@ class UserSchema(StrictSchema):
 	fullname = fields.String()
 	email = fields.Email()
 	bets = URLFor('/bets')
+	score = fields.Integer()
 	creation = fields.DateTime()
 	connection = fields.DateTime()
 

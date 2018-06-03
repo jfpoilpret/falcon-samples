@@ -370,7 +370,7 @@ def test_list_users(client):
 		'login': 'jfpoilpret',
 		'fullname': 'Jean-Francois Poilpret',
 		'admin': True,
-		'status': 'approved'
+		'status': 'approved',
 	}
 	assert_dict(expected, actual[0])
     
@@ -385,7 +385,7 @@ def test_get_user_by_id(client):
 		'login': 'jfpoilpret',
 		'fullname': 'Jean-Francois Poilpret',
 		'admin': True,
-		'status': 'approved'
+		'status': 'approved',
 	}
 	assert_dict(expected, actual)
 
@@ -426,6 +426,7 @@ def test_post_user(client):
 		'email': 'dummy@dummy.com',
 		'admin': True,
 		'status': 'approved',
+		'score': 0,
 		'connection': None
 	}
 	assert_dict(expected, user)
