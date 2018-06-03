@@ -22,6 +22,8 @@ Also install useful tools during project development:
 	pip3 install gunicorn	# Web server engine useful for testing
 	pip3 install httpie	# A better curl, useful for testing REST API
 	pip3 install pytest	# Automated tests library
+	pip3 install behave	# BDD test library
+
 
 Develop fourth example
 ----------------------
