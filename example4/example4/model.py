@@ -47,6 +47,7 @@ class DBMatch(Base):
 	venue_id = Column(Integer, ForeignKey('venue.id'), nullable = False)
 	team1_id = Column(Integer, ForeignKey('team.id'))
 	team2_id = Column(Integer, ForeignKey('team.id'))
+	winner_id = Column(Integer, ForeignKey('team.id'))
 	group = Column(String)
 
 	venue = relationship(DBVenue)
@@ -54,6 +55,9 @@ class DBMatch(Base):
 	team2 = relationship(DBTeam, foreign_keys = [team2_id])
 
 	result = Column(String)
+	winner = relationship(DBTeam, foreign_keys = [winner_id])
+	goals1 = Column(Integer)
+	goals2 = Column(Integer)
 
 	def __repr__(self):
 		return 'Match(id = %d, date = %s, venue = %s (%d), team1 = %s (%d), team2 = %s (%d), result = %s)' % (
@@ -74,6 +78,7 @@ class DBUser(Base):
 	admin = Column(Boolean, nullable = False, default = False)
 	fullname = Column(String, nullable = False, unique = True)
 	email = Column(String, unique = True)
+	score = Column(Integer, default = 0)
 	creation = Column(DateTime, nullable = False)
 	connection = Column(DateTime)
 

@@ -1,12 +1,12 @@
 import logging
 import re
 import falcon
-from sqlalchemy import inspect
+from sqlalchemy import inspect, or_
 from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema, validates, ValidationError
 from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
-from ..model import DBBet, DBMatch
+from ..model import DBBet, DBMatch, DBTeam, DBUser
 
 logger = logging.getLogger(__name__)
 
@@ -70,71 +70,105 @@ class Match(object):
 		if match:
 			values = req.context['json']
 			if update_item_fields(match, Match.patch_request_schema.fields, values):
+				# if result is known, then update result-dependent attributes
+				self._update_match_score(match)
+				# save match changes
 				session.add(match)
 				session.commit()
 				session.refresh(match)
 
 				if match.result:
-					winner, goals_winner, goals_loser, goals_diff = self._compute_result(match)
-					# update team points if match is during rounds 1,2,3
+					# if this is a group match, then update points for team1 and teams2
 					if match.group in ['1', '2', '3']:
-						self._update_points(match.team1, 1, winner, goals_winner, goals_loser)
-						self._update_points(match.team2, 2, winner, goals_winner, goals_loser)
-						session.refresh(match)
+						self._update_team_score(match.team1)
+						self._update_team_score(match.team2)
+						
+					# Update all bets for this match
+					self._update_bets_score(match)
 
-					#TODO small refactoring needed?
-					# batch update of all bets for this match
-					bets = inspect(DBBet).local_table
-					connection = session.connection()
-					# Perform updates for exact results (score 3)
-					update = bets.update().where(bets.c.match_id == match.id).\
-						where(bets.c.result == match.result).\
-						values(score = 3)
-					connection.execute(update)
-					# Perform updates for correct results with same goals difference (score 2)
-					update = bets.update().where(bets.c.match_id == match.id).\
-						where(bets.c.winner == winner).where(bets.c.goals_diff == goals_diff).\
-						values(score = 2)
-					connection.execute(update)
-					# Perform updates for correct bet on winner (score 1)
-					update = bets.update().where(bets.c.match_id == match.id).\
-						where(bets.c.winner == winner).where(bets.c.goals_diff != goals_diff).\
-						values(score = 1)
-					connection.execute(update)
-					# Perform updates for lost bets (score 0)
-					update = bets.update().where(bets.c.match_id == match.id).\
-						where(bets.c.result is not None).where(bets.c.winner != winner).\
-						values(score = 0)
-					connection.execute(update)
+					# Update score of all betters
+					self._update_users_score()
+
 			req.context['result'] = match
 		else:
 			resp.status = falcon.HTTP_NOT_FOUND
 
-	def _update_points(self, team, num_team, winner, goals_winner, goals_loser):
-		if winner == 0:
-			team.drawn = team.drawn + 1
-			team.points = team.points + 1
-			team.goals_for = goals_winner
-			team.goals_against = goals_loser
-		elif num_team == winner:
-			team.won = team.won + 1
-			team.points = team.points + 3
-			team.goals_for = goals_winner
-			team.goals_against = goals_loser
-		else:
-			team.lost = team.lost + 1
-			team.goals_for = goals_loser
-			team.goals_against = goals_winner
+	def _update_match_score(self, match):
+		# type: (DBMatch) -> None
+		if match.result:
+			result = RESULT_PATTERN.match(match.result)
+			goals1 = int(result.group(1))
+			goals2 = int(result.group(2))
+			if goals1 > goals2:
+				match.winner = match.team1
+			elif goals1 < goals2:
+				match.winner = match.team2
+			else:
+				match.winner = None
+			match.goals1 = goals1
+			match.goals2 = goals2
+
+	def _update_team_score(self, team):
+		# type: (DBTeam) -> None
+		team_id = team.id
+		matches = self.session().query(DBMatch).\
+			filter(DBMatch.group.in_(['1', '2', '3'])).\
+			filter(DBMatch.result != None).\
+			filter(or_(
+				DBMatch.team1_id == team_id, 
+				DBMatch.team2_id == team_id)).all()
+		team.played = len(matches)
+		team.won = len([match for match in matches if match.winner_id == team_id])
+		team.drawn = len([match for match in matches if match.winner_id is None])
+		team.lost = team.played - team.won - team.drawn
+		goals_for_against = [(match.goals1, match.goals2) for match in matches if match.team1_id == team_id] + \
+			[(match.goals2, match.goals1) for match in matches if match.team2_id == team_id]
+		team.goals_for = sum(goals[0] for goals in goals_for_against)
+		team.goals_against = sum(goals[1] for goals in goals_for_against)
 		self.session().add(team)
 		self.session().commit()
+		self.session().refresh(team)
 
-	def _compute_result(self, match):
-		result = RESULT_PATTERN.match(match.result)
-		goals1 = int(result.group(1))
-		goals2 = int(result.group(2))
-		if goals1 > goals2:
-			return (1, goals1, goals2, goals1 - goals2)
-		elif goals1 < goals2:
-			return (2, goals2, goals1, goals2 - goals1)
+	def _update_bets_score(self, match):
+		# type (DBMatch) -> none
+		# massage result for later queries
+		result = match.result
+		goals_diff = match.goals1 - match.goals2
+		if goals_diff > 0:
+			winner = 1
+		elif goals_diff < 0:
+			winner = 2
 		else:
-			return (0, goals1, goals1, 0)
+			winner = 0
+		goals_diff = abs(goals_diff)
+		# batch update of all bets for this match
+		bets = inspect(DBBet).local_table
+		users = inspect(DBUser).local_table
+		connection = self.session().connection()
+		# Perform updates for exact results (score 3)
+		update = bets.update().where(bets.c.match_id == match.id).\
+			where(bets.c.result == result).\
+			values(score = 3)
+		connection.execute(update)
+		# Perform updates for correct results with same goals difference (score 2)
+		update = bets.update().where(bets.c.match_id == match.id).\
+			where(bets.c.winner == winner).\
+			where(bets.c.goals_diff == goals_diff).\
+			values(score = 2)
+		connection.execute(update)
+		# Perform updates for correct bet on winner (score 1)
+		update = bets.update().where(bets.c.match_id == match.id).\
+			where(bets.c.winner == winner).\
+			where(bets.c.goals_diff != goals_diff).\
+			values(score = 1)
+		connection.execute(update)
+		# Perform updates for lost bets (score 0)
+		update = bets.update().where(bets.c.match_id == match.id).\
+			where(bets.c.result is not None).\
+			where(bets.c.winner != winner).\
+			values(score = 0)
+		connection.execute(update)
+
+	def _update_users_score(self):
+		#TODO
+		pass
