@@ -152,6 +152,7 @@ class Match(object):
 		connection.execute(update)
 		# Perform updates for correct results with same goals difference (score 2)
 		update = bets.update().where(bets.c.match_id == match.id).\
+			where(bets.c.result != result).\
 			where(bets.c.winner == winner).\
 			where(bets.c.goals_diff == goals_diff).\
 			values(score = 2)
