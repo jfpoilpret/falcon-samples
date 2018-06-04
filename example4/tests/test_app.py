@@ -88,12 +88,14 @@ def test_list_teams(client):
 		'href': href('/team/1'),
 		'name': 'Egypt',
 		'group': 'Group A',
+		'rank': None,
 		'played': 0,
 		'won': 0,
 		'drawn': 0,
 		'lost': 0,
 		'goals_for': 0,
 		'goals_against': 0,
+		'goals_diff': 0,
 		'points': 0,
 	}
 	assert actual[0] == expected
@@ -102,12 +104,14 @@ def test_list_teams(client):
 		'href': href('/team/32'),
 		'name': 'Senegal',
 		'group': 'Group H',
+		'rank': None,
 		'played': 0,
 		'won': 0,
 		'drawn': 0,
 		'lost': 0,
 		'goals_for': 0,
 		'goals_against': 0,
+		'goals_diff': 0,
 		'points': 0,
 	}
 	assert actual[31] == expected
@@ -122,12 +126,14 @@ def test_get_team(client):
 		'href': href('/team/11'),
 		'name': 'France',
 		'group': 'Group C',
+		'rank': None,
 		'played': 0,
 		'won': 0,
 		'drawn': 0,
 		'lost': 0,
 		'goals_for': 0,
 		'goals_against': 0,
+		'goals_diff': 0,
 		'points': 0,
 	}
 	assert actual == expected

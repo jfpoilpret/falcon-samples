@@ -8,12 +8,14 @@ class TeamSchema(Schema):
 	href = URLFor('/team/{id}')
 	name = fields.String(required=True)
 	group = fields.String()
+	rank = fields.Integer()
 	played = fields.Integer()
 	won = fields.Integer()
 	drawn = fields.Integer()
 	lost = fields.Integer()
 	goals_for = fields.Integer()
 	goals_against = fields.Integer()
+	goals_diff = fields.Integer()
 	points = fields.Integer()
 
 class Teams(object):

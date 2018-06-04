@@ -17,12 +17,14 @@ class DBTeam(Base):
 	name = Column(String, nullable = False, unique = True)
 	group = Column(String, nullable = False)
 
+	rank = Column(Integer)
 	played = Column(Integer, nullable = False, default = 0)
 	won = Column(Integer, nullable = False, default = 0)
 	drawn = Column(Integer, nullable = False, default = 0)
 	lost = Column(Integer, nullable = False, default = 0)
 	goals_for = Column(Integer, nullable = False, default = 0)
 	goals_against = Column(Integer, nullable = False, default = 0)
+	goals_diff = Column(Integer, nullable = False, default = 0)
 	points = Column(Integer, nullable = False, default = 0)
 
 	def __repr__(self):

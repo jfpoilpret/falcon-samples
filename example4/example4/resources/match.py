@@ -80,10 +80,10 @@ class Match(object):
 
 				if match.result:
 					# if this is a group match, then update points for team1 and teams2
-					if match.group in ['1', '2', '3']:
+					if match.round in ['1', '2', '3']:
 						self._update_team_score(match.team1)
 						self._update_team_score(match.team2)
-						
+						self._update_group_ranking(match.group)
 					# Update all bets for this match
 					self._update_bets_score(match)
 
@@ -126,9 +126,32 @@ class Match(object):
 			[(match.goals2, match.goals1) for match in matches if match.team2_id == team_id]
 		team.goals_for = sum(goals[0] for goals in goals_for_against)
 		team.goals_against = sum(goals[1] for goals in goals_for_against)
+		team.goals_diff = team.goals_for - team.goals_against
 		self.session().add(team)
 		self.session().commit()
 		self.session().refresh(team)
+
+	def _update_group_ranking(self, group):
+		teams = self.session().query(DBTeam).filter_by(group = group).\
+			order_by(	DBTeam.played, \
+						DBTeam.points.desc(), \
+						DBTeam.goals_diff.desc(), \
+						DBTeam.goals_for.desc()).all()
+		rank = 1
+		played = points = goals_diff = goals_for = -100
+		for team in teams:
+			team.rank = rank
+			#TODO if several teams have the same rank then the next rank should be more than rank+1, e.g. 1,1,3,4
+			if	team.played != played or team.points != points \
+				or team.goals_diff != goals_diff or team.goals_for != goals_for:
+				rank = rank + 1
+				played = team.played
+				points = team.points
+				goals_diff = team.goals_diff
+				goals_for = team.goals_for
+			self.session().add(team)
+			self.session().commit()
+			self.session().refresh(team)
 
 	def _update_bets_score(self, match):
 		# type (DBMatch) -> none
