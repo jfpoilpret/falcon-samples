@@ -107,7 +107,7 @@ def set_bets(context, user):
 		}]))
 		assert response.status == falcon.HTTP_OK
 
-@when('admin sets match results')
+@when('match results are')
 def set_match_results(context):
 	# type: (Context) -> None
 	client = context.admin
@@ -144,3 +144,26 @@ def check_user_score(context, user, score):
 	print("actual score %d" % the_user['score'])
 	print("expected score %d" % score)
 	assert json.loads(response.text)['score'] == score
+
+@then('teams in "{group}" should match')
+def check_group_teams(context, group):
+	# type: (Context, str, int) -> None
+	client = context.admin
+	response = client.simulate_get('/team')
+	assert response.status == falcon.HTTP_OK
+	teams = json.loads(response.text)
+	teams = { team['rank']: team for team in teams if team['group'] == group}
+	for row in context.table:
+		rank = int(row['rank'])
+		team = teams.get(rank)
+		print('rank "%d" -> team %s' % (rank, str(team)))
+		assert team is not None
+		assert team['name'] == row['team']
+		assert team['played'] == int(row['Pld'])
+		assert team['won'] == int(row['W'])
+		assert team['drawn'] == int(row['D'])
+		assert team['lost'] == int(row['L'])
+		assert team['goals_for'] == int(row['GF'])
+		assert team['goals_against'] == int(row['GA'])
+		assert team['goals_diff'] == int(row['GD'])
+		assert team['points'] == int(row['Pts'])

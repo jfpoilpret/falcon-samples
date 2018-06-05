@@ -113,7 +113,7 @@ class Match(object):
 		# type: (DBTeam) -> None
 		team_id = team.id
 		matches = self.session().query(DBMatch).\
-			filter(DBMatch.group.in_(['1', '2', '3'])).\
+			filter(DBMatch.round.in_(['1', '2', '3'])).\
 			filter(DBMatch.result != None).\
 			filter(or_(
 				DBMatch.team1_id == team_id, 
@@ -127,25 +127,25 @@ class Match(object):
 		team.goals_for = sum(goals[0] for goals in goals_for_against)
 		team.goals_against = sum(goals[1] for goals in goals_for_against)
 		team.goals_diff = team.goals_for - team.goals_against
+		team.points = 3 * team.won + team.drawn
 		self.session().add(team)
 		self.session().commit()
 		self.session().refresh(team)
 
 	def _update_group_ranking(self, group):
 		teams = self.session().query(DBTeam).filter_by(group = group).\
-			order_by(	DBTeam.played, \
-						DBTeam.points.desc(), \
+			order_by(	DBTeam.points.desc(), \
 						DBTeam.goals_diff.desc(), \
 						DBTeam.goals_for.desc()).all()
 		rank = 1
-		played = points = goals_diff = goals_for = -100
+		points = goals_diff = goals_for = -100
 		for team in teams:
+			logger.debug('Group "%s": team %s' % (group, str(team)))
 			team.rank = rank
 			#TODO if several teams have the same rank then the next rank should be more than rank+1, e.g. 1,1,3,4
-			if	team.played != played or team.points != points \
+			if	team.points != points \
 				or team.goals_diff != goals_diff or team.goals_for != goals_for:
 				rank = rank + 1
-				played = team.played
 				points = team.points
 				goals_diff = team.goals_diff
 				goals_for = team.goals_for
