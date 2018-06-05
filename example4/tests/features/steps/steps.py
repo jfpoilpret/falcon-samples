@@ -147,7 +147,7 @@ def check_user_score(context, user, score):
 
 @then('teams in "{group}" should match')
 def check_group_teams(context, group):
-	# type: (Context, str, int) -> None
+	# type: (Context, str) -> None
 	client = context.admin
 	response = client.simulate_get('/team')
 	assert response.status == falcon.HTTP_OK
@@ -167,3 +167,18 @@ def check_group_teams(context, group):
 		assert team['goals_against'] == int(row['GA'])
 		assert team['goals_diff'] == int(row['GD'])
 		assert team['points'] == int(row['Pts'])
+
+@then('matches in "{round}" should match')
+def check_round_matches(context, round):
+	# type: (Context, str) -> None
+	client = context.admin
+	response = client.simulate_get('/match')
+	assert response.status == falcon.HTTP_OK
+	matches = json.loads(response.text)
+	matches = { match['matchnumber']: match for match in matches if match['round'] == round }
+	for row in context.table:
+		matchnumber = int(row['matchnumber'])
+		match = matches.get(matchnumber)
+		print('match #%d -> match %s' % (matchnumber, str(match)))
+		assert match is not None
+		assert '%s - %s' % (match['team1']['name'], match['team2']['name']) == row['match']

@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class MatchSchema(Schema):
 	id = fields.Integer()
 	href = URLFor('/match/{id}')
+	matchnumber = fields.Integer()
 	round = fields.String()
 	matchtime = fields.DateTime()
 	venue = fields.Nested('VenueSchema')
@@ -79,11 +80,17 @@ class Match(object):
 				session.refresh(match)
 
 				if match.result:
-					# if this is a group match, then update points for team1 and teams2
 					if match.round in ['1', '2', '3']:
+						# if this is a group match, then update points for team1 and teams2
 						self._update_team_score(match.team1)
 						self._update_team_score(match.team2)
 						self._update_group_ranking(match.group)
+						if match.round == '3':
+							# update next round (round of 16) if whole group is played
+							self._update_round_of_16(match.group)
+					else:
+						#TODO during knockout phase, every match result provides one team for a future match
+						pass
 					# Update all bets for this match
 					self._update_bets_score(match)
 
@@ -153,6 +160,25 @@ class Match(object):
 			self.session().commit()
 			self.session().refresh(team)
 
+	def _update_round_of_16(self, group):
+		# first check if all matches in group have been played already
+		unplayed = self.session().query(func.count('*')).select_from(DBMatch). \
+			filter_by(group = group, result = None).scalar()
+		if unplayed:
+			return
+		# all matches have been played, now check all teams from the group are uniquely ranked
+		# (1 in rank 1, 1 in rank 2)
+		teams = self.session().query(DBTeam).filter_by(group = group).all()
+		rank1 = [team for team in teams if team.rank == 1]
+		if len(rank1) == 1:
+			# Find the next match for this result
+			self._update_match_team('Winner %s' % group, rank1[0])
+			rank2 = [team for team in teams if team.rank == 2]
+			if len(rank2) == 1:
+				# Find the next match for this result
+				self._update_match_team('Runner-up %s' % group, rank2[0])
+		#TODO if ranking not unique, record an action for administrator
+
 	def _update_bets_score(self, match):
 		# type (DBMatch) -> none
 		# massage result for later queries
@@ -205,3 +231,15 @@ class Match(object):
 		# this may lead to None instead of 0 if there are no bets with a valid score
 		update = users.update().values(score = select_score)
 		connection.execute(update)
+
+	def _update_match_team(self, old_team_name, new_team):
+		team_id = self.session().query(DBTeam.id).filter_by(name = old_team_name).scalar()
+		match = self.session().query(DBMatch).filter(DBMatch.team1_id == team_id).one_or_none()
+		if match:
+			match.team1 = new_team
+		else:
+			match = self.session().query(DBMatch).filter(DBMatch.team2_id == team_id).one_or_none()
+			match.team2 = new_team
+		self.session().add(match)
+		self.session().commit()
+		self.session().refresh(match)
