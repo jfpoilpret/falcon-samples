@@ -201,8 +201,12 @@ def test_list_matches(client):
 		'venue': {
 			'name': 'Fisht Stadium, Sochi'
 		},
-		'team1': None,
-		'team2': None
+		'team1': {
+			'name': 'Winner Group A'
+		},
+		'team2': {
+			'name': 'Runner-up Group B'
+		}
 	}
 	assert_dict(expected, actual[48])
     

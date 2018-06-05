@@ -71,8 +71,9 @@ class Bets(object):
 			#TODO add error message?
 			return
 			
-		# ensure match is already known (teams not null)
-		unknown_match_ids = [id for id, bet in patched_bets.items() if bet.match.team1_id is None or bet.match.team2_id is None]
+		# ensure match is already known (teams not "virtual")
+		unknown_match_ids = [id for id, bet in patched_bets.items() 
+			if bet.match.team1.group == 'virtual' or bet.match.team2.group == 'virtual']
 		if unknown_match_ids:
 			resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
 			#TODO add error message?

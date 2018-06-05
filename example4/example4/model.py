@@ -44,6 +44,7 @@ class DBMatch(Base):
 	__tablename__ = 'match'
 
 	id = Column(Integer, primary_key = True)
+	matchnumber = Column(Integer, nullable = False, unique = True)
 	round = Column(String, nullable = False)
 	matchtime = Column(DateTime, nullable = False)
 	venue_id = Column(Integer, ForeignKey('venue.id'), nullable = False)

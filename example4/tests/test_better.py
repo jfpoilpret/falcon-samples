@@ -72,7 +72,7 @@ def test_get_all_bets(new_user, better_client):
 	# check all bets have no result
 	assert len([bet for bet in bets if bet['result'] is not None]) == 0
 	# check the number of bets for future matches
-	assert len([bet for bet in bets if bet['match']['team1'] is None]) == 16
+	assert len([bet for bet in bets if bet['match']['team1']['group'] == 'virtual']) == 16
 
 def test_patch_bet_future_match(new_user, better_client):
 	# type: (testing.TestClient) -> None
