@@ -89,8 +89,9 @@ class Match(object):
 							# update next round (round of 16) if whole group is played
 							self._update_round_of_16(match.group)
 					else:
-						#TODO during knockout phase, every match result provides one team for a future match
-						pass
+						# during knockout phase, every match result provides one team for a future match
+						self._update_next_round(match)
+
 					# Update all bets for this match
 					self._update_bets_score(match)
 
@@ -140,6 +141,7 @@ class Match(object):
 		self.session().refresh(team)
 
 	def _update_group_ranking(self, group):
+		# type (str) -> none
 		teams = self.session().query(DBTeam).filter_by(group = group).\
 			order_by(	DBTeam.points.desc(), \
 						DBTeam.goals_diff.desc(), \
@@ -161,6 +163,7 @@ class Match(object):
 			self.session().refresh(team)
 
 	def _update_round_of_16(self, group):
+		# type (str) -> none
 		# first check if all matches in group have been played already
 		unplayed = self.session().query(func.count('*')).select_from(DBMatch). \
 			filter_by(group = group, result = None).scalar()
@@ -178,6 +181,13 @@ class Match(object):
 				# Find the next match for this result
 				self._update_match_team('Runner-up %s' % group, rank2[0])
 		#TODO if ranking not unique, record an action for administrator
+
+	def _update_next_round(self, match):
+		# type (DBMatch) -> none
+		self._update_match_team('Winner Match #%d' % match.matchnumber, match.winner)
+		# This is only for the Third place play-off match
+		loser = match.team1 if match.winner_id == match.team2_id else match.team2
+		self._update_match_team('Loser Match #%d' % match.matchnumber, loser)
 
 	def _update_bets_score(self, match):
 		# type (DBMatch) -> none
