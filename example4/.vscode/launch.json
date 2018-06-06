@@ -11,6 +11,12 @@
             "program": "${workspaceFolder}/.venv/bin/behave"
         },
         {
+            "name": "Python: Behave @debug",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/behave --tags=debug"
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
