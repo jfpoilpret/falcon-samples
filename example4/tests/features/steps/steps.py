@@ -6,6 +6,7 @@ import falcon
 from falcon import testing
 import json
 import re
+import itertools
 
 class UserClient(object):
 	def __init__(self, id, client):
@@ -151,22 +152,35 @@ def check_group_teams(context, group):
 	client = context.admin
 	response = client.simulate_get('/team')
 	assert response.status == falcon.HTTP_OK
-	teams = json.loads(response.text)
-	teams = { team['rank']: team for team in teams if team['group'] == group}
+	all_teams = json.loads(response.text)
+	all_teams = [ team for team in all_teams if team['group'] == group ]
+	teams = {}
+	for team in all_teams:
+		rank = team['rank']
+		rankteams = teams.get(rank ,[])
+		rankteams.append(team)
+		teams[rank] = rankteams
+
 	for row in context.table:
 		rank = int(row['rank'])
-		team = teams.get(rank)
-		print('rank "%d" -> team %s' % (rank, str(team)))
-		assert team is not None
-		assert team['name'] == row['team']
-		assert team['played'] == int(row['Pld'])
-		assert team['won'] == int(row['W'])
-		assert team['drawn'] == int(row['D'])
-		assert team['lost'] == int(row['L'])
-		assert team['goals_for'] == int(row['GF'])
-		assert team['goals_against'] == int(row['GA'])
-		assert team['goals_diff'] == int(row['GD'])
-		assert team['points'] == int(row['Pts'])
+		rankteams = teams.get(rank)
+		assert rankteams
+		# Find one team among all teams with the same rank
+		found = False
+		for team in rankteams:
+			if team['name'] == row['team']:
+				assert team['played'] == int(row['Pld'])
+				assert team['won'] == int(row['W'])
+				assert team['drawn'] == int(row['D'])
+				assert team['lost'] == int(row['L'])
+				assert team['goals_for'] == int(row['GF'])
+				assert team['goals_against'] == int(row['GA'])
+				assert team['goals_diff'] == int(row['GD'])
+				assert team['points'] == int(row['Pts'])
+				found =  True
+		# If we come here, that means no team was found for the expected rank
+		if not found:
+			assert False, 'no matching team for %s' % str(row)
 
 @then('matches in "{round}" should match')
 def check_round_matches(context, round):

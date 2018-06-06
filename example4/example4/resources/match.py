@@ -146,11 +146,10 @@ class Match(object):
 			order_by(	DBTeam.points.desc(), \
 						DBTeam.goals_diff.desc(), \
 						DBTeam.goals_for.desc()).all()
-		rank = 1
+		rank = 0
 		points = goals_diff = goals_for = -100
 		for team in teams:
 			logger.debug('Group "%s": team %s' % (group, str(team)))
-			team.rank = rank
 			#TODO if several teams have the same rank then the next rank should be more than rank+1, e.g. 1,1,3,4
 			if	team.points != points \
 				or team.goals_diff != goals_diff or team.goals_for != goals_for:
@@ -158,6 +157,7 @@ class Match(object):
 				points = team.points
 				goals_diff = team.goals_diff
 				goals_for = team.goals_for
+			team.rank = rank
 			self.session().add(team)
 			self.session().commit()
 			self.session().refresh(team)

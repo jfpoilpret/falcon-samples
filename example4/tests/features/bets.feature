@@ -46,7 +46,7 @@ Feature: Place bets on matches and get score after matches play
 			| 2-2 | 0-2    | 0     |
 			| 2-0 | 0-2    | 0     |
 
-	Scenario: Handle teams ranking within group A
+	Scenario: Handle perfect teams ranking
 		Given current date is "2018-06-30T00:00:00"
 		When match results are
 			| round | match                 | result |
@@ -82,6 +82,43 @@ Feature: Place bets on matches and get score after matches play
 			| matchnumber | match                       |
 			| 49          | Uruguay - Runner-up Group B |
 			| 51          | Winner Group B - Russia     |
+
+	Scenario: Handle teams ranking with duplicate rank 1
+		Given current date is "2018-06-30T00:00:00"
+		When match results are
+			| round | match                 | result |
+			| 1     | Russia - Saudi Arabia | 2-1    |
+			| 1     | Egypt - Uruguay       | 1-2    |
+		Then teams in "Group A" should match
+			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
+			| 1    | Russia       | 1   | 1 | 0 | 0 | 2  | 1  | 1  | 3   |
+			| 1    | Uruguay      | 1   | 1 | 0 | 0 | 2  | 1  | 1  | 3   |
+			| 2    | Egypt        | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
+			| 2    | Saudi Arabia | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
+		When match results are
+			| round | match                  | result |
+			| 2     | Russia - Egypt         | 2-1    |
+			| 2     | Uruguay - Saudi Arabia | 2-1    |
+		Then teams in "Group A" should match
+			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
+			| 1    | Russia       | 2   | 2 | 0 | 0 | 4  | 2  | 2  | 6   |
+			| 1    | Uruguay      | 2   | 2 | 0 | 0 | 4  | 2  | 2  | 6   |
+			| 2    | Egypt        | 2   | 0 | 0 | 2 | 2  | 4  | -2 | 0   |
+			| 2    | Saudi Arabia | 2   | 0 | 0 | 2 | 2  | 4  | -2 | 0   |
+		When match results are
+			| round | match                | result |
+			| 3     | Uruguay - Russia     | 2-2    |
+			| 3     | Saudi Arabia - Egypt | 0-1    |
+		Then teams in "Group A" should match
+			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
+			| 1    | Uruguay      | 3   | 2 | 1 | 0 | 6  | 4  | 2  | 7   |
+			| 1    | Russia       | 3   | 2 | 1 | 0 | 6  | 4  | 2  | 7   |
+			| 2    | Egypt        | 3   | 1 | 0 | 2 | 3  | 4  | -1 | 3   |
+			| 3    | Saudi Arabia | 3   | 0 | 0 | 3 | 2  | 5  | -3 | 0   |
+		And matches in "Round of 16" should match
+			| matchnumber | match                              |
+			| 49          | Winner Group A - Runner-up Group B |
+			| 51          | Winner Group B - Runner-up Group A |
 
 # #TODO review later
 # Scenario: Handle bets throughout the whole competition
