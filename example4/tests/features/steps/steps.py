@@ -59,6 +59,7 @@ def add_user(context, user):
 	context.users[user] = UserClient(user_id, client)
 
 @given('current date is "{time}"')
+@when('current date is "{time}"')
 def set_time(context, time):
 	# type: (Context, str) -> None
 	response = context.admin.simulate_patch('/time', body = json.dumps({
@@ -92,6 +93,7 @@ def find_match_in_matches(match, round, matches):
 			return one_match
 	return None
 
+@given('user "{user}" places bets')
 @when('user "{user}" places bets')
 def set_bets(context, user):
 	# type: (Context, str) -> None

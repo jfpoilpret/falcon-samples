@@ -244,12 +244,13 @@ class Match(object):
 
 	def _update_match_team(self, old_team_name, new_team):
 		team_id = self.session().query(DBTeam.id).filter_by(name = old_team_name).scalar()
-		match = self.session().query(DBMatch).filter(DBMatch.team1_id == team_id).one_or_none()
-		if match:
-			match.team1 = new_team
-		else:
-			match = self.session().query(DBMatch).filter(DBMatch.team2_id == team_id).one_or_none()
-			match.team2 = new_team
-		self.session().add(match)
-		self.session().commit()
-		self.session().refresh(match)
+		if team_id:
+			match = self.session().query(DBMatch).filter(DBMatch.team1_id == team_id).one_or_none()
+			if match:
+				match.team1 = new_team
+			else:
+				match = self.session().query(DBMatch).filter(DBMatch.team2_id == team_id).one_or_none()
+				match.team2 = new_team
+			self.session().add(match)
+			self.session().commit()
+			self.session().refresh(match)
