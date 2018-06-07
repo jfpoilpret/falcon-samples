@@ -1,9 +1,10 @@
 import falcon
 from marshmallow import fields, Schema
-from ..utils.marshmallow_util import URLFor, StrictSchema
-from ..utils.falcon_util import update_item_fields
-from ..utils.timebase import TimeBase
-from ..utils.auth import hash_password
+from ..utils import URLFor, StrictSchema, update_item_fields, TimeBase, hash_password
+# from ..utils.marshmallow_util import URLFor, StrictSchema
+# from ..utils.falcon_util import update_item_fields
+# from ..utils.timebase import TimeBase
+# from ..utils.auth import hash_password
 from .resource import Resource
 from ..model import DBBet, DBMatch, DBUser
 

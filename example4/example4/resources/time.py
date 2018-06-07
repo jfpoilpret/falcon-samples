@@ -1,8 +1,9 @@
 from datetime import timedelta
 import falcon
 from marshmallow import Schema, fields
-from ..utils.marshmallow_util import StrictSchema
-from ..utils.timebase import TimeBase
+from ..utils import StrictSchema, TimeBase
+# from ..utils.marshmallow_util import StrictSchema
+# from ..utils.timebase import TimeBase
 from .resource import Resource
 
 class TimeSchema(StrictSchema):

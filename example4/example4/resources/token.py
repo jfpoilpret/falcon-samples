@@ -2,7 +2,8 @@
 import falcon
 from marshmallow import Schema, fields
 from falcon_auth import BasicAuthBackend
-from ..utils.auth import Authenticator
+from ..utils import Authenticator
+# from ..utils.auth import Authenticator
 
 class TokenSchema(Schema):
 	token = fields.UUID()
