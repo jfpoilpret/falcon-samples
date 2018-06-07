@@ -1,12 +1,12 @@
 import falcon
 import logging
 import re
-from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema, validates, ValidationError
 from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
 from ..utils.timebase import TimeBase
-from ..model import DBBet, DBUser
+from ..model import DBBet
+from .resource import Resource
 
 logger = logging.getLogger(__name__)
 
@@ -29,17 +29,13 @@ class BetPatchSchema(StrictSchema):
 			logger.info('BetPatchSchema bad \'result\' format for %s', value)
 			raise ValidationError('result must comply to format "0-0"', 'result')
 
-class Bets(object):
+class Bets(Resource):
 	schema = BetSchema(many = True)
 	patch_request_schema = BetPatchSchema(many = True)
 
 	def __init__(self, timebase):
 		# type: (TimeBase) -> None
-		self._timebase = timebase
-
-	def session(self):
-		# type: () -> Session
-		return self._session
+		Resource.__init__(self, timebase)
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
@@ -64,7 +60,7 @@ class Bets(object):
 		patched_bets = {id: bet for id, bet in bets.items() if id in new_bets.keys()}
 
 		# ensure all bets are for future matches!
-		now = self._timebase.now()
+		now = self.now()
 		past_match_ids = [id for id, bet in patched_bets.items() if bet.match.matchtime <= now]
 		if past_match_ids:
 			resp.status = falcon.HTTP_FORBIDDEN

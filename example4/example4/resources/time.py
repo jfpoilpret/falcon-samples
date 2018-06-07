@@ -3,42 +3,41 @@ import falcon
 from marshmallow import Schema, fields
 from ..utils.marshmallow_util import StrictSchema
 from ..utils.timebase import TimeBase
+from .resource import Resource
 
 class TimeSchema(StrictSchema):
 	delta = fields.Integer()
 	now = fields.DateTime()
 
-class Time(object):
+class Time(Resource):
 	schema = TimeSchema()
 
 	def __init__(self, timebase):
 		# type: (TimeBase) -> None
-		self._timebase = timebase
+		Resource.__init__(self, timebase)
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		req.context['result'] = {
-			'now': self._timebase.now(),
-			'delta': self._timebase.delta().total_seconds()
+			'now': self.now(),
+			'delta': self.timebase().delta().total_seconds()
 		}
 
 	def on_delete(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		# check admin only
-		if not req.context['user'].admin:
-			resp.status = falcon.HTTP_FORBIDDEN
+		if not self.is_admin(req, resp):
 			return
-		self._timebase.reset()
+		self.timebase().reset()
 
 	def on_patch(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		# check admin only
-		if not req.context['user'].admin:
-			resp.status = falcon.HTTP_FORBIDDEN
+		if not self.is_admin(req, resp):
 			return
 		values = req.context['json']
 		if 'now' in values.keys():
-			self._timebase.set_timebase(values['now'])
+			self.timebase().set_timebase(values['now'])
 		elif 'delta' in values.keys():
 			delta = timedelta(seconds = values['delta'])
-			self._timebase.set_timedelta(delta)
+			self.timebase().set_timedelta(delta)

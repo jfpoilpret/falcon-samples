@@ -1,7 +1,7 @@
 import falcon
 from marshmallow import fields, Schema
-from sqlalchemy.orm.session import Session
 from ..utils.marshmallow_util import URLFor
+from .resource import Resource
 from ..model import DBTeam
 
 class TeamSchema(Schema):
@@ -19,28 +19,17 @@ class TeamSchema(Schema):
 	goals_diff = fields.Integer()
 	points = fields.Integer()
 
-class Teams(object):
+class Teams(Resource):
 	schema = TeamSchema(many = True)
-
-	def session(self):
-		# type: () -> Session
-		return self._session
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		req.context['result'] = self.session().query(DBTeam).filter(DBTeam.group != 'virtual').all()
 
-class Team(object):
+class Team(Resource):
 	schema = TeamSchema()
-
-	def session(self):
-		# type: () -> Session
-		return self._session
 
 	def on_get(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		team = self.session().query(DBTeam).filter(DBTeam.id == id, DBTeam.group != 'virtual').one_or_none()
-		if team:
-			req.context['result'] = team
-		else:
-			resp.status = falcon.HTTP_NOT_FOUND
+		self.result(req, resp,
+			self.session().query(DBTeam).filter(DBTeam.id == id, DBTeam.group != 'virtual').one_or_none())

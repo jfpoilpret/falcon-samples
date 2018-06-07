@@ -3,10 +3,11 @@ import re
 import falcon
 from sqlalchemy import inspect, or_
 from sqlalchemy.sql import func, select
-from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema, validates, ValidationError
 from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
+from ..utils.timebase import TimeBase
+from .resource import Resource
 from ..model import DBBet, DBMatch, DBTeam, DBUser
 
 logger = logging.getLogger(__name__)
@@ -38,34 +39,29 @@ class MatchPatchSchema(StrictSchema):
 			logger.info('MatchPatchSchema bad \'result\' format for %s', value)
 			raise ValidationError('result must comply to format "0-0"', 'result')
 
-class Matches(object):
+class Matches(Resource):
 	schema = MatchSchema(many = True)
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		req.context['result'] = self._session.query(DBMatch).all()
+		req.context['result'] = self.session().query(DBMatch).all()
 
-class Match(object):
+class Match(Resource):
 	schema = MatchSchema()
 	patch_request_schema = MatchPatchSchema()
 
-	def session(self):
-		# type: () -> Session
-		return self._session
+	def __init__(self, timebase):
+		# type: (TimeBase) -> None
+		Resource.__init__(self, timebase)
 
 	def on_get(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		match = self.session().query(DBMatch).filter_by(id = id).one_or_none()
-		if match:
-			req.context['result'] = match
-		else:
-			resp.status = falcon.HTTP_NOT_FOUND
+		self.result(req, resp, self.session().query(DBMatch).filter_by(id = id).one_or_none())
 
 	#FIXME prevent setting result of future match!
 	def on_patch(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		if not req.context['user'].admin:
-			resp.status = falcon.HTTP_FORBIDDEN
+		if not self.is_admin(req, resp):
 			return
 		session = self.session()
 		match = session.query(DBMatch).filter_by(id = id).one_or_none()

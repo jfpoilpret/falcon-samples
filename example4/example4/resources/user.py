@@ -1,10 +1,10 @@
 import falcon
-from sqlalchemy.orm.session import Session
 from marshmallow import fields, Schema
 from ..utils.marshmallow_util import URLFor, StrictSchema
 from ..utils.falcon_util import update_item_fields
 from ..utils.timebase import TimeBase
 from ..utils.auth import hash_password
+from .resource import Resource
 from ..model import DBBet, DBMatch, DBUser
 
 #TODO improve read/write fields, hide some field depending on who is authenticated
@@ -38,7 +38,7 @@ class UserPatchSchema(StrictSchema):
 	fullname = fields.String()
 	email = fields.Email()
 
-class Users(object):
+class Users(Resource):
 	schema = UserSchema()
 	get_schema = UserSchema(many = True)
 	post_request_schema = UserPostSchema()
@@ -52,11 +52,7 @@ class Users(object):
 
 	def __init__(self, timebase):
 		# type: (TimeBase) -> None
-		self._timebase = timebase
-
-	def session(self):
-		# type: () -> Session
-		return self._session
+		Resource.__init__(self, timebase)
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
@@ -65,12 +61,11 @@ class Users(object):
 	#TODO (later) check who is creating user: self registration or admin
 	def on_post(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		if not req.context['user'].admin:
-			resp.status = falcon.HTTP_FORBIDDEN
+		if not self.is_admin(req, resp):
 			return
 		user = DBUser(**req.context['json'])
 		user.password = hash_password(user.password)
-		user.creation = self._timebase.now()
+		user.creation = self.now()
 		self.session().add(user)
 		self.session().commit()
 		self.session().refresh(user)
@@ -84,32 +79,22 @@ class Users(object):
 		resp.status = falcon.HTTP_CREATED
 
 #TODO missing method to get oneself?
-class User(object):
+class User(Resource):
 	schema = UserSchema()
 	patch_request_schema = UserPatchSchema()
 
-	def session(self):
-		# type: () -> Session
-		return self._session
-
 	def on_get(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, str) -> None
-		user = self._load_user(id_or_name)
-		if user:
-			req.context['result'] = user
-		else:
-			resp.status = falcon.HTTP_NOT_FOUND
+		self.result(req, resp, self.get_user(id_or_name))
 
 	def on_patch(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, int) -> None
 		# only admin or user can modify himself
-		user = self._load_user(id_or_name)
+		user = self.result(req, resp, self.get_user(id_or_name))
 		if not user:
-			resp.status = falcon.HTTP_NOT_FOUND
 			return
 		values = req.context['json']
-		if req.context['user'].admin:
-			# keep all fields
+		if self.is_admin(req, resp):
 			pass
 		elif req.context['user'].id == user.id:
 			# check only some fields (fullname, password) are patched
@@ -119,7 +104,6 @@ class User(object):
 				#TODO pass extra information on fields that cannot be patched
 				return
 		else:
-			resp.status = falcon.HTTP_FORBIDDEN
 			return
 		# hash password if modified
 		if 'password' in values.keys():
@@ -133,25 +117,13 @@ class User(object):
 
 	def on_delete(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, str) -> None
-		if not req.context['user'].admin:
-			resp.status = falcon.HTTP_FORBIDDEN
+		if not self.is_admin(req, resp):
 			return
-		user = self._load_user(id_or_name)
+		user = self.result(req, resp, self.get_user(id_or_name))
 		if not user:
-			resp.status = falcon.HTTP_NOT_FOUND
 			return
 		# delete all bets
 		self.session().query(DBBet).filter_by(better_id = user.id).delete(synchronize_session = False)
 		self.session().delete(user)
 		self.session().commit()
 		resp.status = falcon.HTTP_NO_CONTENT
-		
-	def get_user(self, login):
-		return self.session().query(DBUser).filter_by(login = login).one_or_none
-
-	def _load_user(self, id_or_name):
-		# type: (str) -> DBUser
-		if id_or_name.isnumeric():
-			return self.session().query(DBUser).filter_by(id = int(id_or_name)).one_or_none()
-		else:
-			return self.session().query(DBUser).filter_by(login = id_or_name).one_or_none()
