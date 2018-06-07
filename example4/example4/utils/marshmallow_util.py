@@ -33,6 +33,7 @@ class URLFor(fields.FormattedString):
 class StrictSchema(Schema):
 	@validates_schema(pass_original=True)
 	def reject_extra_fields(self, data, original_data):
+		# type: (object, object) -> None
 		logger.debug('reject_extra_fields original_data = %s', str(original_data))
 		if isinstance(original_data, list):
 			for original in original_data:
@@ -41,6 +42,7 @@ class StrictSchema(Schema):
 			self._check_one_item(original_data)
 
 	def _check_one_item(self, original_data):
+		# type: (object) -> None
 		unknown = set(original_data) - set(self.fields)
 		if unknown:
 			logger.info('Unknown field(s) %s in schema %s', str(unknown), self.__class__.__name__)

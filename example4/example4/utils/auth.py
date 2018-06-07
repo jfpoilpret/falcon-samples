@@ -11,10 +11,12 @@ logger = logging.getLogger(__name__)
 # Got these 2 hash password functions from:
 # https://www.pythoncentral.io/hashing-strings-with-python/
 def hash_password(password):
+	# type: (str) -> str
 	salt = uuid4().hex
 	return sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
 
 def verify_password(expected, actual):
+	# type: (str, str) -> bool
 	password, salt = expected.split(':')
 	return password == sha256(salt.encode() + actual.encode()).hexdigest()
 
@@ -31,6 +33,7 @@ class Authenticator(object):
 		Authenticator.instance = self
 	
 	def new_token(self, user):
+		# type: (object) -> (UUID, datetime)
 		logger.debug('new_token(%s)', str(user))
 		token = uuid4()
 		expiry = datetime.now() + self._duration
@@ -38,11 +41,13 @@ class Authenticator(object):
 		return token, expiry
 
 	def remove_token(self, token):
+		# type: (str) -> None
 		logger.debug('remove_token(%s)', token)
 		if token in self._tokens.keys():
 			del self._tokens[token]
 
 	def expire_tokens(self):
+		# type: () -> None
 		logger.debug('expire_tokens()')
 		now = datetime.now()
 		expired = []
@@ -54,6 +59,7 @@ class Authenticator(object):
 			del self._tokens[token]
 
 	def authenticate_token(self, token):
+		# type: (str) -> DBUser
 		logger.debug('authenticate_token(%s)', token)
 		if token in self._tokens.keys():
 			logger.debug('token is in tokens list: %s', token)
@@ -83,6 +89,7 @@ class Authenticator(object):
 		return None
 
 	def authenticate_user_password(self, username, password):
+		# type: (str, str) -> DBUser
 		logger.debug('authenticate_user_password(%s)', username)
 		session = self._sql_middleware.new_session()
 		user = session.query(DBUser).filter_by(login = username).one_or_none()
@@ -100,6 +107,7 @@ class Authenticator(object):
 		return None
 
 	def __call__(self, username_or_token, password = None):
+		# type: (str, str) -> DBUser
 		if password:
 			return self.authenticate_user_password(username_or_token, password)
 		else:

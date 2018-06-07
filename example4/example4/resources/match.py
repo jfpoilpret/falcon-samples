@@ -137,7 +137,7 @@ class Match(Resource):
 		self.session().refresh(team)
 
 	def _update_group_ranking(self, group):
-		# type (str) -> none
+		# type: (str) -> None
 		teams = self.session().query(DBTeam).filter_by(group = group).\
 			order_by(	DBTeam.points.desc(), \
 						DBTeam.goals_diff.desc(), \
@@ -159,7 +159,7 @@ class Match(Resource):
 			self.session().refresh(team)
 
 	def _update_round_of_16(self, group):
-		# type (str) -> none
+		# type: (str) -> None
 		# first check if all matches in group have been played already
 		unplayed = self.session().query(func.count('*')).select_from(DBMatch). \
 			filter_by(group = group, result = None).scalar()
@@ -179,14 +179,14 @@ class Match(Resource):
 		#TODO if ranking not unique, record an action for administrator
 
 	def _update_next_round(self, match):
-		# type (DBMatch) -> none
+		# type: (DBMatch) -> None
 		self._update_match_team('Winner Match #%d' % match.matchnumber, match.winner)
 		# This is only for the Third place play-off match
 		loser = match.team1 if match.winner_id == match.team2_id else match.team2
 		self._update_match_team('Loser Match #%d' % match.matchnumber, loser)
 
 	def _update_bets_score(self, match):
-		# type (DBMatch) -> none
+		# type: (DBMatch) -> None
 		# massage result for later queries
 		result = match.result
 		goals_diff = match.goals1 - match.goals2
@@ -226,6 +226,7 @@ class Match(Resource):
 		connection.execute(update)
 
 	def _update_users_score(self):
+		# type: () -> None
 		#TODO limit update to users with bets for the current updated match (other users shall not change)
 		# batch update of all users 
 		bets = inspect(DBBet).local_table
@@ -239,6 +240,7 @@ class Match(Resource):
 		connection.execute(update)
 
 	def _update_match_team(self, old_team_name, new_team):
+		# type: (str, DBTeam) -> None
 		team_id = self.session().query(DBTeam.id).filter_by(name = old_team_name).scalar()
 		if team_id:
 			match = self.session().query(DBMatch).filter(DBMatch.team1_id == team_id).one_or_none()

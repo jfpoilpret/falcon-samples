@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 class TimeBase(object):
 	def __init__(self):
+		# type: () -> None
 		self._delta = timedelta()
 
 	def delta(self):
@@ -13,6 +14,7 @@ class TimeBase(object):
 		return datetime.now() + self._delta
 
 	def reset(self):
+		# type: () -> None
 		self._delta = timedelta()
 		
 	def set_timebase(self, timebase):

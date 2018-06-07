@@ -21,6 +21,7 @@ from .initdb import init_db
 from .configuration import Configuration
 
 def create_app():
+	# type: () -> API
 	# Get configuration
 	config = Configuration()
 
