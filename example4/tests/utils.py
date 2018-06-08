@@ -26,3 +26,9 @@ def assert_dict(expected, actual):
 		else:
 			assert value == actual[key]
 
+def set_time_base(client, base):
+	# type: (testing.TestClient, str) -> None
+	response = client.simulate_patch('/time', body = json.dumps({
+		'now': base
+	}))
+	assert response.status == falcon.HTTP_OK

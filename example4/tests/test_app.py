@@ -5,7 +5,7 @@ from falcon import testing
 from falcon.testing import helpers
 import json
 import pytest
-from .utils import href, json_to_datetime, assert_dict
+from .utils import href, json_to_datetime, assert_dict, set_time_base
 
 from example4.app import api
 
@@ -38,12 +38,9 @@ def test_get_time(client):
 
 def test_patch_time_base(client):
 	base = '2018-01-01T14:30:00'
-	response = client.simulate_patch('/time', body = json.dumps({
-		'now': base
-	}))
+	set_time_base(client, base)
 	base = datetime.strptime(base, '%Y-%m-%dT%H:%M:%S')
 	delta = base - datetime.now()
-	assert response.status == falcon.HTTP_OK
 
 	response = client.simulate_get('/time')
 	assert response.status == falcon.HTTP_OK
@@ -237,6 +234,7 @@ def test_get_match(client):
 
 def test_patch_match_time(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-01T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'matchtime': '2018-06-26T21:00:00+00:00'
 	}))
@@ -258,6 +256,7 @@ def test_patch_match_time(client):
 
 def test_patch_match_venue(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-01T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 1
 	}))
@@ -283,6 +282,7 @@ def test_patch_match_venue(client):
 
 def test_patch_match_unknown_venue(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-01T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 24
 	}))
@@ -290,6 +290,7 @@ def test_patch_match_unknown_venue(client):
 
 def test_patch_match_teams(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-01T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 1,
 		'team2_id': 2
@@ -321,6 +322,7 @@ def test_patch_match_teams(client):
 
 def test_patch_match_unknown_match(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-01T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 124
 	}))
@@ -328,6 +330,7 @@ def test_patch_match_unknown_match(client):
 
 def test_patch_match_result(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-26T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'result': '0-3'
 	}))
@@ -349,8 +352,17 @@ def test_patch_match_result(client):
 
 def test_patch_match_incorrect_result(client):
 	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-26T00:00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'result': '0-X'
+	}))
+	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+
+def test_patch_future_match_result(client):
+	# type: (testing.TestClient) -> None
+	set_time_base(client, '2018-06-26T00:00:00')
+	response = client.simulate_patch('/match/64', body = json.dumps({
+		'result': '0-1'
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 

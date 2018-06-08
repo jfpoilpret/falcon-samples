@@ -59,7 +59,6 @@ class Match(Resource):
 		# type: (falcon.Request, falcon.Response, int) -> None
 		self.result(req, resp, self.session().query(DBMatch).filter_by(id = id).one_or_none())
 
-	#FIXME prevent setting result of future match!
 	def on_patch(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
 		if not self.is_admin(req, resp):
@@ -68,6 +67,11 @@ class Match(Resource):
 		match = session.query(DBMatch).filter_by(id = id).one_or_none()
 		if match:
 			values = req.context['json']
+			# prevent setting result of future match!
+			if 'result' in values.keys() and self.now() < match.matchtime:
+				resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
+				#TODO pass error message?
+				return
 			if update_item_fields(match, Match.patch_request_schema.fields, values):
 				# if result is known, then update result-dependent attributes
 				self._update_match_score(match)

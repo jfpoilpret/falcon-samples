@@ -4,7 +4,7 @@ import falcon
 from falcon import testing
 import json
 import pytest
-from .utils import href, json_to_datetime, assert_dict
+from .utils import href, json_to_datetime, assert_dict, set_time_base
 
 from example4.app import api
 
@@ -74,8 +74,9 @@ def test_get_all_bets(new_user, better_client):
 	# check the number of bets for future matches
 	assert len([bet for bet in bets if bet['match']['team1']['group'] == 'virtual']) == 16
 
-def test_patch_bet_future_match(new_user, better_client):
+def test_patch_bet_future_match(new_user, better_client, admin_client):
 	# type: (testing.TestClient) -> None
+	set_time_base(admin_client, '2018-06-01T00:00:00')
 	response = better_client.simulate_get('/bet')
 	bets = json.loads(response.text)
 	# Take the first match in round 1
@@ -102,11 +103,7 @@ def test_patch_bet_future_match(new_user, better_client):
 def test_patch_bet_past_match(admin_client, better_client):
 	# type: (testing.TestClient) -> None
 	# Requires time base change first (admin only)
-	response = admin_client.simulate_patch('/time', body = json.dumps({
-		'now': '2018-06-30T14:30:00'
-	}))
-	assert response.status == falcon.HTTP_OK
-
+	set_time_base(admin_client, '2018-06-30T14:30:00')
 	response = better_client.simulate_get('/bet')
 	bets = json.loads(response.text)
 	# Take the first match in round 1
@@ -132,8 +129,9 @@ def test_patch_bet_unknown_match(better_client):
 	}]))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 	
-def test_patch_bet_bad_result(better_client):
+def test_patch_bet_bad_result(better_client, admin_client):
 	# type: (testing.TestClient) -> None
+	set_time_base(admin_client, '2018-06-01T00:00:00')
 	response = better_client.simulate_get('/bet')
 	bets = json.loads(response.text)
 	# Take the first match in 1st phase
