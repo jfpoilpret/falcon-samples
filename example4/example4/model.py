@@ -8,8 +8,6 @@ Base  = declarative_base()
 
 #TODO Add other fields (flag, jersey, team, base camp location...)
 #TODO review field attributes (size, unicity...)
-#TODO shall we define "virtual" teams, like "Group A Winner" to be used for 2nd round matches (16th finals...)?
-# Declare Team entity
 class DBTeam(Base):
 	__tablename__ = 'team'
 
