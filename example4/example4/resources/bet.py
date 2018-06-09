@@ -18,8 +18,8 @@ class BetSchema(Schema):
 RESULT_PATTERN = re.compile(r'([1-9]?[0-9])-([1-9]?[0-9])')
 
 class BetPatchSchema(StrictSchema):
-	id = fields.Integer()
-	result = fields.String()
+	id = fields.Integer(required = True)
+	result = fields.String(required = True)
 
 	@validates('result')
 	def verify_result(self, value):

@@ -8,7 +8,7 @@ from ..model import DBVenue
 class VenueSchema(Schema):
 	id = fields.Integer()
 	href = URLFor('/venue/{id}')
-	name = fields.String(required=True)
+	name = fields.String()
 
 class Venues(Resource):
 	schema = VenueSchema(many = True)

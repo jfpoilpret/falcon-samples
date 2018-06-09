@@ -20,12 +20,12 @@ class UserSchema(StrictSchema):
 	connection = fields.DateTime()
 
 class UserPostSchema(StrictSchema):
-	login = fields.String()
-	password = fields.String()
+	login = fields.String(required = True)
+	password = fields.String(required = True)
 	status = fields.String()
 	admin = fields.Boolean()
-	fullname = fields.String()
-	email = fields.Email()
+	fullname = fields.String(required = True)
+	email = fields.Email(required = True)
 
 class UserPatchSchema(StrictSchema):
 	login = fields.String()

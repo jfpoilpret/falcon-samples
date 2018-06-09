@@ -7,7 +7,7 @@ from ..model import DBTeam
 class TeamSchema(Schema):
 	id = fields.Integer()
 	href = URLFor('/team/{id}')
-	name = fields.String(required=True)
+	name = fields.String()
 	group = fields.String()
 	rank = fields.Integer()
 	played = fields.Integer()
