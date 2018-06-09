@@ -36,7 +36,7 @@ class Authenticator(object):
 		# type: (object) -> (UUID, datetime)
 		logger.debug('new_token(%s)', str(user))
 		token = uuid4()
-		expiry = datetime.now() + self._duration
+		expiry = datetime.utcnow() + self._duration
 		self._tokens[str(token)] = (user.id, expiry)
 		return token, expiry
 
@@ -49,7 +49,7 @@ class Authenticator(object):
 	def expire_tokens(self):
 		# type: () -> None
 		logger.debug('expire_tokens()')
-		now = datetime.now()
+		now = datetime.utcnow()
 		expired = []
 		for token, (id, expiry) in self._tokens.items():
 			if expiry < now:
@@ -64,11 +64,11 @@ class Authenticator(object):
 		if token in self._tokens.keys():
 			logger.debug('token is in tokens list: %s', token)
 			id, expiry = self._tokens[token]
-			if expiry > datetime.now():
+			if expiry > datetime.utcnow():
 				logger.debug('token has not expired: %s', token)
 				# Update expiry date further if needed?
 				if self._reconduct:
-					self._tokens[token] = (id, datetime.now() + self._duration)
+					self._tokens[token] = (id, datetime.utcnow() + self._duration)
 				session = self._sql_middleware.new_session()
 				user = session.query(DBUser).filter_by(id = id).one_or_none()
 				if user:

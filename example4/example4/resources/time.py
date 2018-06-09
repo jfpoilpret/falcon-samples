@@ -7,6 +7,7 @@ from ..utils import StrictSchema, TimeBase
 from .resource import Resource
 
 class TimeSchema(StrictSchema):
+	#TODO use fields.TimeDelta instead?
 	delta = fields.Integer()
 	now = fields.DateTime()
 

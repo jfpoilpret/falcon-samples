@@ -15,6 +15,7 @@ Prepare a virtual environment for the project sample:
 	pip3 install sqlalchemy
 	pip3 install falcon-auth
 	pip3 install pyyaml
+	pip3 install python-dateutil
 
 Also install useful tools during project development:
 

@@ -1,4 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+def to_naive_datetime(dt):
+	# type: (datetime) -> datetime
+	if dt and dt.tzinfo:
+		return dt.astimezone(timezone.utc).replace(tzinfo = None)
+	else:
+		return dt
 
 class TimeBase(object):
 	def __init__(self):
@@ -11,7 +18,7 @@ class TimeBase(object):
 
 	def now(self):
 		# type: () -> datetime
-		return datetime.now() + self._delta
+		return datetime.utcnow() + self._delta
 
 	def reset(self):
 		# type: () -> None
@@ -19,7 +26,7 @@ class TimeBase(object):
 		
 	def set_timebase(self, timebase):
 		# type: (datetime) -> None
-		self._delta = timebase - datetime.now()
+		self._delta = to_naive_datetime(timebase) - datetime.utcnow()
 
 	def set_timedelta(self, delta):
 		# type: (timedelta) -> None

@@ -1,6 +1,5 @@
 from behave import *
 from behave.runner import Context
-from datetime import datetime
 import base64
 import falcon
 from falcon import testing

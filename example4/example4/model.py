@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Boolean, Enum, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
@@ -46,8 +44,8 @@ class DBMatch(Base):
 	round = Column(String, nullable = False)
 	matchtime = Column(DateTime, nullable = False)
 	venue_id = Column(Integer, ForeignKey('venue.id'), nullable = False)
-	team1_id = Column(Integer, ForeignKey('team.id'))
-	team2_id = Column(Integer, ForeignKey('team.id'))
+	team1_id = Column(Integer, ForeignKey('team.id'), nullable = False)
+	team2_id = Column(Integer, ForeignKey('team.id'), nullable = False)
 	winner_id = Column(Integer, ForeignKey('team.id'))
 	group = Column(String)
 
@@ -62,8 +60,8 @@ class DBMatch(Base):
 
 	def __repr__(self):
 		return 'Match(id = %d, date = %s, venue = %s (%d), team1 = %s (%d), team2 = %s (%d), result = %s)' % (
-			self.id, self.matchtime.strftime('%d.%m.%Y %H:%M'), self.venue.name if self.venue else "unknown", self.venue_id,
-			self.team1.name if self.team1 else 'unknown', self.team1_id, self.team2.name if self.team2 else 'unknown', self.team2_id,
+			self.id, self.matchtime.isoformat(), self.venue.name, self.venue_id,
+			self.team1.name, self.team1_id, self.team2.name, self.team2_id,
 			self.result or 'unknown')
 
 #TODO make email the login? more logical!
@@ -74,7 +72,7 @@ class DBUser(Base):
 	id = Column(Integer, primary_key = True)
 	login = Column(String, nullable = False, unique = True)
 	password = Column(String, nullable = False)
-	status = Column(Enum('pending', 'approved', 'suspended'))
+	status = Column(Enum('pending', 'approved', 'suspended'), nullable = False)
 	admin = Column(Boolean, nullable = False, default = False)
 	fullname = Column(String, nullable = False, unique = True)
 	email = Column(String, unique = True)
@@ -85,7 +83,8 @@ class DBUser(Base):
 	def __repr__(self):
 		return 'User(id = %d, login = %s, fullname = %s, status = %s, admin = %s, creation = %s, connection = %s)' % (
 			self.id, self.login, self.fullname, self.status, str(self.admin), 
-			self.creation.strftime('%d.%m.%Y %H:%M'), self.connection.strftime('%d.%m.%Y %H:%M'))
+			self.creation.isoformat(), 
+			self.connection.isoformat() if self.connection else 'never')
 
 #TODO unique key on better+match
 class DBBet(Base):
@@ -119,7 +118,8 @@ class DBBet(Base):
 
 	def __repr__(self):
 		return 'Bet(id = %d, date = %s, user = %s (%d), match = %s-%s (%d), result = %s)' % (
-			self.id, self.bettime.strftime('%d.%m.%Y %H:%M'), self.user.login, self.better_id,
+			self.id, self.bettime.isoformat() if self.bettime else 'no bet', 
+			self.better.login, self.better_id,
 			self.match.team1.name, self.match.team2.name, self.result or 'unknown')
 	
 # Utility methods to create/drop DB schema from ORM mappings

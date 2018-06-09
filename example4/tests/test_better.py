@@ -76,7 +76,7 @@ def test_get_all_bets(new_user, better_client):
 
 def test_patch_bet_future_match(new_user, better_client, admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(admin_client, '2018-06-01T00:00:00')
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
 	response = better_client.simulate_get('/bet')
 	bets = json.loads(response.text)
 	# Take the first match in round 1
@@ -103,7 +103,7 @@ def test_patch_bet_future_match(new_user, better_client, admin_client):
 def test_patch_bet_past_match(admin_client, better_client):
 	# type: (testing.TestClient) -> None
 	# Requires time base change first (admin only)
-	set_time_base(admin_client, '2018-06-30T14:30:00')
+	set_time_base(admin_client, '2018-06-30T14:30:00+00:00')
 	response = better_client.simulate_get('/bet')
 	bets = json.loads(response.text)
 	# Take the first match in round 1
@@ -131,7 +131,7 @@ def test_patch_bet_unknown_match(better_client):
 	
 def test_patch_bet_bad_result(better_client, admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(admin_client, '2018-06-01T00:00:00')
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
 	response = better_client.simulate_get('/bet')
 	bets = json.loads(response.text)
 	# Take the first match in 1st phase

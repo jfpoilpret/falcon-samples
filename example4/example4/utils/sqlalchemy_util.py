@@ -6,6 +6,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker, Session
 
 logger = logging.getLogger(__name__)
 
+# Middleware to set an SqlAlchemy Session for each request
 class SqlAlchemy(object):
 	def __init__(self, engine):
 		# type: (Engine) -> None

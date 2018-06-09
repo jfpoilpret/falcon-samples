@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
+from dateutil.parser import parse as parse_date
 import base64
 import falcon
 from falcon import testing
@@ -33,14 +34,14 @@ def test_get_time(client):
 	assert actual['delta'] == 0
 
 	now = json_to_datetime(actual['now'])
-	delta = now - datetime.now()
+	delta = now - datetime.now(timezone.utc)
 	assert -2 < delta.total_seconds() < +2
 
 def test_patch_time_base(client):
-	base = '2018-01-01T14:30:00'
+	base = '2018-01-01T14:30:00+00:00'
 	set_time_base(client, base)
-	base = datetime.strptime(base, '%Y-%m-%dT%H:%M:%S')
-	delta = base - datetime.now()
+	base = parse_date(base)
+	delta = base - datetime.now(timezone.utc)
 
 	response = client.simulate_get('/time')
 	assert response.status == falcon.HTTP_OK
@@ -55,8 +56,8 @@ def test_patch_time_base(client):
 	assert response.status == falcon.HTTP_OK
 
 def test_patch_time_delta(client):
-	base = datetime.strptime('2018-01-01T14:30:00', '%Y-%m-%dT%H:%M:%S')
-	delta = (base - datetime.now()).total_seconds()
+	base = parse_date('2018-01-01T14:30:00+00:00')
+	delta = (base - datetime.now(timezone.utc)).total_seconds()
 	response = client.simulate_patch('/time', body = json.dumps({
 		'delta': delta
 	}))
@@ -176,7 +177,7 @@ def test_list_matches(client):
 	expected = {
 		'href': href('/match/1'),
 		'round': '1',
-		'matchtime': '2018-06-14T18:00:00+00:00',
+		'matchtime': '2018-06-14T15:00:00+00:00',
 		'group': 'Group A',
 		'venue': {
 			'name': 'Luzhniki Stadium, Moscow'
@@ -193,7 +194,7 @@ def test_list_matches(client):
 	expected = {
 		'href': href('/match/49'),
 		'round': 'Round of 16',
-		'matchtime': '2018-06-30T21:00:00+00:00',
+		'matchtime': '2018-06-30T18:00:00+00:00',
 		'group': '',
 		'venue': {
 			'name': 'Fisht Stadium, Sochi'
@@ -215,7 +216,7 @@ def test_get_match(client):
 	expected = {
 		'href': href('/match/35'),
 		'round': '3',
-		'matchtime': '2018-06-25T21:00:00+00:00',
+		'matchtime': '2018-06-25T18:00:00+00:00',
 		'group': 'Group B',
 		'venue': {
 			'href': href('/venue/11'),
@@ -234,9 +235,9 @@ def test_get_match(client):
 
 def test_patch_match_time(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00')
+	set_time_base(client, '2018-06-01T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
-		'matchtime': '2018-06-26T21:00:00+00:00'
+		'matchtime': '2018-06-26T18:00:00+00:00'
 	}))
 	assert response.status == falcon.HTTP_OK
 
@@ -244,19 +245,19 @@ def test_patch_match_time(client):
 	expected = {
 		'href': href('/match/35'),
 		'round': '3',
-		'matchtime': '2018-06-26T21:00:00+00:00',
+		'matchtime': '2018-06-26T18:00:00+00:00',
 		'group': 'Group B'
 	}
 	assert_dict(expected, actual)
 
 	response = client.simulate_patch('/match/35', body = json.dumps({
-		'matchtime': '2018-06-25T21:00:00+00:00'
+		'matchtime': '2018-06-25T18:00:00+00:00'
 	}))
 	assert response.status == falcon.HTTP_OK
 
 def test_patch_match_venue(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00')
+	set_time_base(client, '2018-06-01T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 1
 	}))
@@ -266,7 +267,7 @@ def test_patch_match_venue(client):
 	expected = {
 		'href': href('/match/35'),
 		'round': '3',
-		'matchtime': '2018-06-25T21:00:00+00:00',
+		'matchtime': '2018-06-25T18:00:00+00:00',
 		'group': 'Group B',
 		'venue': {
 			'href': href('/venue/1'),
@@ -282,7 +283,7 @@ def test_patch_match_venue(client):
 
 def test_patch_match_unknown_venue(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00')
+	set_time_base(client, '2018-06-01T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 24
 	}))
@@ -290,7 +291,7 @@ def test_patch_match_unknown_venue(client):
 
 def test_patch_match_teams(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00')
+	set_time_base(client, '2018-06-01T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 1,
 		'team2_id': 2
@@ -301,7 +302,7 @@ def test_patch_match_teams(client):
 	expected = {
 		'href': href('/match/35'),
 		'round': '3',
-		'matchtime': '2018-06-25T21:00:00+00:00',
+		'matchtime': '2018-06-25T18:00:00+00:00',
 		'group': 'Group B',
 		'team1': {
 			'href': href('/team/1'),
@@ -322,7 +323,7 @@ def test_patch_match_teams(client):
 
 def test_patch_match_unknown_match(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00')
+	set_time_base(client, '2018-06-01T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 124
 	}))
@@ -330,7 +331,7 @@ def test_patch_match_unknown_match(client):
 
 def test_patch_match_result(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-26T00:00:00')
+	set_time_base(client, '2018-06-26T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'result': '0-3'
 	}))
@@ -352,7 +353,7 @@ def test_patch_match_result(client):
 
 def test_patch_match_incorrect_result(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-26T00:00:00')
+	set_time_base(client, '2018-06-26T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'result': '0-X'
 	}))
@@ -360,7 +361,7 @@ def test_patch_match_incorrect_result(client):
 
 def test_patch_future_match_result(client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-26T00:00:00')
+	set_time_base(client, '2018-06-26T00:00:00+00:00')
 	response = client.simulate_patch('/match/64', body = json.dumps({
 		'result': '0-1'
 	}))

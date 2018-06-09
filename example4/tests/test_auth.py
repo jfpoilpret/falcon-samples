@@ -5,7 +5,8 @@ from falcon.testing import helpers
 import base64
 import json
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
+from dateutil.parser import parse as parse_date
 
 from example4.app import api
 from example4.utils.auth import hash_password, verify_password
@@ -44,13 +45,9 @@ def test_get_token_good_credentials(client):
 	assert actual['token']
 	# check expiry date
 	assert 'expiry' in actual
-	# remove timezone
-	expiry = actual['expiry'][:-6]
-	# remove microseconds
-	if expiry.index('.') > 0:
-		expiry = expiry[:expiry.index('.')]
-	expiry = datetime.strptime(expiry, '%Y-%m-%dT%H:%M:%S')
-	delta = expiry - datetime.now()
+	expiry = actual['expiry']
+	expiry = parse_date(expiry)
+	delta = expiry - datetime.now(timezone.utc)
 	assert 86350 < delta.total_seconds() < 86450
 
 def test_other_resource_basic_credentials(client):
@@ -87,13 +84,8 @@ def test_other_resource_correct_token(client):
 	actual = json.loads(response.text)
 	assert 'connection' in actual
 	connection = actual['connection']
-	# remove timezone
-	connection = actual['connection'][:-6]
-	# remove microseconds
-	if connection.index('.') > 0:
-		connection = connection[:connection.index('.')]
-	connection = datetime.strptime(connection, '%Y-%m-%dT%H:%M:%S')
-	delta = datetime.now() - connection
+	connection = parse_date(connection)
+	delta = datetime.now(timezone.utc) - connection
 	assert 0 <= delta.total_seconds() < 20
 
 # def test_post_user_no_auth(client):

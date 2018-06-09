@@ -1,8 +1,11 @@
 import io
-from datetime import datetime
+from datetime import datetime, timezone
+import logging
 
 from .model import DBTeam, DBVenue, DBMatch, DBUser
 from .utils.auth import hash_password
+
+logger = logging.getLogger(__name__)
 
 def init_db(session):
 	init_teams(session)
@@ -38,7 +41,7 @@ def init_users(session):
 			session.add(user)
 	session.commit()
 
-#FIXME fix TZ (Moscow) to UTC, so that we use a common time reference!
+#TODO make TZ offset configurable?
 def init_matches(session):
 	with io.open('example4/data/matches.txt') as f:
 		num = 1
@@ -47,13 +50,16 @@ def init_matches(session):
 			venue = session.query(DBVenue).filter_by(name = fields[2]).one_or_none()
 			team1 = session.query(DBTeam).filter_by(name = fields[3]).one_or_none()
 			team2 = session.query(DBTeam).filter_by(name = fields[4]).one_or_none()
+			matchtime = datetime.strptime(fields[1] + ' +0300', '%d/%m/%Y %H:%M %z').astimezone(timezone.utc).replace(tzinfo = None)
 			match = DBMatch(matchnumber = num,
 							round = fields[0],
-							matchtime = datetime.strptime(fields[1], '%d/%m/%Y %H:%M'),
+							matchtime = matchtime,
 							venue = venue,
 							group = fields[5],
 							team1 = team1,
 							team2 = team2)
+			logger.debug('matchtime %s (%s)' % (match.matchtime, match.matchtime.isoformat()))
 			session.add(match)
 			session.commit()
+			logger.debug('Adding match %s' % str(match))
 			num = num + 1
