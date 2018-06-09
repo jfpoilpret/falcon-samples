@@ -177,7 +177,7 @@ Feature: Place bets on matches and get score after matches play
 			| 1     | Tunisia - England       | 1-3    |
 			| 1     | Colombia - Japan        | 0-2    |
 			| 1     | Poland - Senegal        | 1-1    |
-		When current date is "2018-06-19T18:00:00"
+		When current date is "2018-06-19T18:00:00+03:00"
 		And match results are
 			| round | match                   | result |
 			| 1     | Russia - Saudi Arabia   | 3-0    |
