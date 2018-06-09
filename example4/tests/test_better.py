@@ -4,7 +4,7 @@ import falcon
 from falcon import testing
 import json
 import pytest
-from .utils import href, json_to_datetime, assert_dict, set_time_base
+from .utils import href, json_to_datetime, assert_dict, set_time_base, reset_time_base
 
 from example4.app import api
 
@@ -23,7 +23,8 @@ def admin_client():
 		'Authorization': 'Token %s' % token
 	}
 	assert response.status == falcon.HTTP_OK
-	return client
+	yield client
+	reset_time_base(client)
 
 @pytest.fixture
 def new_user(admin_client):

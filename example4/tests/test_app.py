@@ -6,7 +6,7 @@ from falcon import testing
 from falcon.testing import helpers
 import json
 import pytest
-from .utils import href, json_to_datetime, assert_dict, set_time_base
+from .utils import href, json_to_datetime, assert_dict, set_time_base, reset_time_base
 
 from example4.app import api
 
@@ -24,7 +24,8 @@ def client():
 	client._default_headers = {
 		'Authorization': 'Token %s' % token
 	}
-	return client
+	yield client
+	reset_time_base(client)
 
 def test_get_time(client):
 	response = client.simulate_get('/time')

@@ -30,3 +30,8 @@ def set_time_base(client, base):
 		'now': base
 	}))
 	assert response.status == falcon.HTTP_OK
+
+def reset_time_base(client):
+	# type: (testing.TestClient, str) -> None
+	response = client.simulate_delete('/time')
+	assert response.status == falcon.HTTP_OK
