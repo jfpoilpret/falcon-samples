@@ -1,17 +1,16 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Boolean, Enum, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Boolean, Enum, Integer, String, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 Base  = declarative_base()
 
 #TODO Add other fields (flag, jersey, team, base camp location...)
-#TODO review field attributes (size, unicity...)
 class DBTeam(Base):
 	__tablename__ = 'team'
 
 	id = Column(Integer, primary_key = True)
-	name = Column(String, nullable = False, unique = True)
-	group = Column(String, nullable = False)
+	name = Column(String(100), nullable = False, unique = True)
+	group = Column(String(20), nullable = False)
 
 	rank = Column(Integer)
 	played = Column(Integer, nullable = False, default = 0)
@@ -31,7 +30,7 @@ class DBVenue(Base):
 	__tablename__ = 'venue'
 
 	id = Column(Integer, primary_key = True)
-	name = Column(String, nullable = False, unique = True)
+	name = Column(String(100), nullable = False, unique = True)
 
 	def __repr__(self):
 		return 'Venue(id = %d, name = %s)' % (self.id, self.name)
@@ -41,19 +40,19 @@ class DBMatch(Base):
 
 	id = Column(Integer, primary_key = True)
 	matchnumber = Column(Integer, nullable = False, unique = True)
-	round = Column(String, nullable = False)
+	round = Column(String(50), nullable = False)
 	matchtime = Column(DateTime, nullable = False)
 	venue_id = Column(Integer, ForeignKey('venue.id'), nullable = False)
 	team1_id = Column(Integer, ForeignKey('team.id'), nullable = False)
 	team2_id = Column(Integer, ForeignKey('team.id'), nullable = False)
 	winner_id = Column(Integer, ForeignKey('team.id'))
-	group = Column(String)
+	group = Column(String(20))
 
 	venue = relationship(DBVenue)
 	team1 = relationship(DBTeam, foreign_keys = [team1_id])
 	team2 = relationship(DBTeam, foreign_keys = [team2_id])
 
-	result = Column(String)
+	result = Column(String(5))
 	winner = relationship(DBTeam, foreign_keys = [winner_id])
 	goals1 = Column(Integer)
 	goals2 = Column(Integer)
@@ -70,12 +69,12 @@ class DBUser(Base):
 	__tablename__ = 'user'
 
 	id = Column(Integer, primary_key = True)
-	login = Column(String, nullable = False, unique = True)
-	password = Column(String, nullable = False)
+	login = Column(String(50), nullable = False, unique = True)
+	password = Column(String(250), nullable = False)
 	status = Column(Enum('pending', 'approved', 'suspended'), nullable = False)
 	admin = Column(Boolean, nullable = False, default = False)
-	fullname = Column(String, nullable = False, unique = True)
-	email = Column(String, unique = True)
+	fullname = Column(String(100), nullable = False, unique = True)
+	email = Column(String(100), unique = True)
 	score = Column(Integer, default = 0)
 	creation = Column(DateTime, nullable = False)
 	connection = Column(DateTime)
@@ -86,7 +85,6 @@ class DBUser(Base):
 			self.creation.isoformat(), 
 			self.connection.isoformat() if self.connection else 'never')
 
-#TODO unique key on better+match
 class DBBet(Base):
 	__tablename__ = 'bet'
 
@@ -115,6 +113,10 @@ class DBBet(Base):
 	#	0 if result is wrong
 	#	None if result is None
 	score = Column(Integer)
+
+	__table_args__ = (
+		UniqueConstraint("better_id", "match_id"),
+	)
 
 	def __repr__(self):
 		return 'Bet(id = %d, date = %s, user = %s (%d), match = %s-%s (%d), result = %s)' % (
