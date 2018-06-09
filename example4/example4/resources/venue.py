@@ -2,7 +2,6 @@ import falcon
 from marshmallow import fields, Schema
 
 from ..utils import URLFor
-# from ..utils.marshmallow_util import URLFor
 from .resource import Resource
 from ..model import DBVenue
 

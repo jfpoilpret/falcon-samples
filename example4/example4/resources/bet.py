@@ -2,9 +2,6 @@ import falcon
 import logging
 import re
 from marshmallow import fields, Schema, validates, ValidationError
-# from ..utils.marshmallow_util import URLFor, StrictSchema
-# from ..utils.falcon_util import update_item_fields
-# from ..utils.timebase import TimeBase
 from ..utils import URLFor, StrictSchema, update_item_fields, TimeBase
 from ..model import DBBet
 from .resource import Resource
