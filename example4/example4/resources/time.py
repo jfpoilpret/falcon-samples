@@ -5,8 +5,7 @@ from ..utils import StrictSchema, TimeBase
 from .resource import Resource
 
 class TimeSchema(StrictSchema):
-	#TODO use fields.TimeDelta instead?
-	delta = fields.Integer()
+	delta = fields.TimeDelta()
 	now = fields.DateTime()
 
 class Time(Resource):
@@ -18,10 +17,7 @@ class Time(Resource):
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		req.context['result'] = {
-			'now': self.now(),
-			'delta': self.timebase().delta().total_seconds()
-		}
+		self._set_result(req)
 
 	def on_delete(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
@@ -39,5 +35,12 @@ class Time(Resource):
 		if 'now' in values.keys():
 			self.timebase().set_timebase(values['now'])
 		elif 'delta' in values.keys():
-			delta = timedelta(seconds = values['delta'])
-			self.timebase().set_timedelta(delta)
+			self.timebase().set_timedelta(values['delta'])
+		self._set_result(req)
+
+	def _set_result(self, req):
+		# type: (falcon.Request) -> None
+		req.context['result'] = {
+			'now': self.now(),
+			'delta': self.timebase().delta()
+		}
