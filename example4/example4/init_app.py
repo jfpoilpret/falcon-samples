@@ -10,13 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from .model import create_db, drop_db
-
-from .utils.falcon_util import ExceptionHandler, LoggingMiddleware
-from .utils.marshmallow_util import context_middleware
-from .utils.sqlalchemy_util import SqlAlchemy
-from .utils.timebase import TimeBase
-from .utils.auth import Authenticator
-
+from .utils import ExceptionHandler, LoggingMiddleware, context_middleware, SqlAlchemy, TimeBase, Authenticator
 from .initdb import init_db
 from .configuration import Configuration
 
