@@ -15,7 +15,6 @@ Prepare a virtual environment for the project sample:
 	pip3 install sqlalchemy
 	pip3 install falcon-auth
 	pip3 install pyyaml
-	pip3 install python-dateutil
 	pip3 install gunicorn	# Web server engine used for testing and prod
 
 Also install useful tools during project development:
@@ -23,6 +22,7 @@ Also install useful tools during project development:
 	pip3 install ipython	# IDLE useful for checking API doc
 	pip3 install httpie	# A better curl, useful for testing REST API
 	pip3 install pytest	# Automated tests library
+	pip3 install python-dateutil	# date parse utility used by unit tests
 	pip3 install behave	# BDD test library
 
 
