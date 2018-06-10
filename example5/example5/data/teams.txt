@@ -1,0 +1,64 @@
+Egypt	Group A
+Russia	Group A
+Saudi Arabia	Group A
+Uruguay	Group A
+Iran	Group B
+Morocco	Group B
+Portugal	Group B
+Spain	Group B
+Australia	Group C
+Denmark	Group C
+France	Group C
+Peru	Group C
+Argentina	Group D
+Croatia	Group D
+Iceland	Group D
+Nigeria	Group D
+Brazil	Group E
+Costa Rica	Group E
+Serbia	Group E
+Switzerland	Group E
+Germany	Group F
+Korea Republic	Group F
+Mexico	Group F
+Sweden	Group F
+Belgium	Group G
+England	Group G
+Panama	Group G
+Tunisia	Group G
+Colombia	Group H
+Japan	Group H
+Poland	Group H
+Senegal	Group H
+Winner Group A	virtual
+Winner Group B	virtual
+Winner Group C	virtual
+Winner Group D	virtual
+Winner Group E	virtual
+Winner Group F	virtual
+Winner Group G	virtual
+Winner Group H	virtual
+Runner-up Group A	virtual
+Runner-up Group B	virtual
+Runner-up Group C	virtual
+Runner-up Group D	virtual
+Runner-up Group E	virtual
+Runner-up Group F	virtual
+Runner-up Group G	virtual
+Runner-up Group H	virtual
+Winner Match #49	virtual
+Winner Match #50	virtual
+Winner Match #53	virtual
+Winner Match #54	virtual
+Winner Match #51	virtual
+Winner Match #52	virtual
+Winner Match #55	virtual
+Winner Match #56	virtual
+Winner Match #57	virtual
+Winner Match #58	virtual
+Winner Match #59	virtual
+Winner Match #60	virtual
+Loser Match #61	virtual
+Loser Match #62	virtual
+Winner Match #61	virtual
+Winner Match #62	virtual

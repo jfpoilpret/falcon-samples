@@ -1,0 +1,36 @@
+{
+    "python.unitTest.pyTestArgs": [
+        "tests"
+    ],
+    "python.unitTest.pyTestEnabled": true,
+    "python.unitTest.pyTestPath": "${workspaceFolder}/.venv/bin/pytest",
+    "python.unitTest.cwd": "${workspaceFolder}",
+    "todohighlight.include": [
+        "**/*.py",
+        "**/*.ts",
+        "**/*.html",
+        "**/*.css"
+    ],
+    "todohighlight.exclude": [
+        "**/node_modules/**",
+        "**/bower_components/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/.vscode/**",
+        "**/.github/**",
+        "**/_output/**",
+        "**/*.min.*",
+        "**/*.map",
+        "**/.next/**",
+        "**/.venv/**",
+        "**/.pytest_cache/**",
+        "**/__pycache__/**"
+    ],
+    "todohighlight.maxFilesForSearch": 20000,
+    "todohighlight.keywords": [
+        "TODO",
+        "FIXME"
+    ],
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false
+}
