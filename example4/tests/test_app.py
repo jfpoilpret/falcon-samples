@@ -425,7 +425,8 @@ def test_list_users(client):
 		'status': 'approved',
 	}
 	assert_dict(expected, actual[0])
-	#TODO check password is not present
+	# check password is not present
+	assert 'password' not in actual[0].keys()
     
 def test_get_user_by_id(client):
 	response = client.simulate_get('/user/1')

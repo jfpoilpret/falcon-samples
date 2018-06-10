@@ -4,12 +4,10 @@ from ..utils import URLFor, StrictSchema, update_item_fields, TimeBase, hash_pas
 from .resource import Resource
 from ..model import DBBet, DBMatch, DBUser
 
-#TODO improve read/write fields, hide some field depending on who is authenticated
 class UserSchema(StrictSchema):
 	id = fields.Integer()
 	href = URLFor('/user/{id}')
 	email = fields.Email()
-	password = fields.String()
 	status = fields.String()
 	admin = fields.Boolean()
 	fullname = fields.String()

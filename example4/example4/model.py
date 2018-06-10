@@ -63,7 +63,6 @@ class DBMatch(Base):
 			self.team1.name, self.team1_id, self.team2.name, self.team2_id,
 			self.result or 'unknown')
 
-#TODO make email the login? more logical!
 #TODO Add picture or gravatar?
 class DBUser(Base):
 	__tablename__ = 'user'
