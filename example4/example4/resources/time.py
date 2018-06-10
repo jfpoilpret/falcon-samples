@@ -22,15 +22,13 @@ class Time(Resource):
 	def on_delete(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		# check admin only
-		if not self.is_admin(req, resp):
-			return
+		self.check_admin(req)
 		self.timebase().reset()
 
 	def on_patch(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
 		# check admin only
-		if not self.is_admin(req, resp):
-			return
+		self.check_admin(req)
 		values = req.context['json']
 		if 'now' in values.keys():
 			self.timebase().set_timebase(values['now'])

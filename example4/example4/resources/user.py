@@ -58,8 +58,7 @@ class Users(Resource):
 	#TODO (later) check who is creating user: self registration or admin
 	def on_post(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		if not self.is_admin(req, resp):
-			return
+		self.check_admin(req)
 		user = DBUser(**req.context['json'])
 		user.password = hash_password(user.password)
 		user.creation = self.now()
@@ -97,10 +96,9 @@ class User(Resource):
 			# check only some fields (fullname, password) are patched
 			extra = values.keys() - ('fullname', 'password') 
 			if extra:
-				resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
-				#TODO pass extra information on fields that cannot be patched
-				return
+				raise falcon.HTTPUnprocessableEntity('The following fields cannot be patched: %s' % ','.join(extra))
 		else:
+			# user is neither admin nor owner of the patched user
 			return
 		# hash password if modified
 		if 'password' in values.keys():
@@ -114,8 +112,7 @@ class User(Resource):
 
 	def on_delete(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, str) -> None
-		if not self.is_admin(req, resp):
-			return
+		self.check_admin(req)
 		user = self.result(req, resp, self.get_user(id_or_name))
 		if not user:
 			return

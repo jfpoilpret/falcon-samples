@@ -21,6 +21,7 @@ class Resource(object):
 		# type: () -> Session
 		return self._session
 	
+	#TODO raise exception instead
 	def result(self, req, resp, value):
 		# type: (falcon.Request, falcon.Response, object) -> object
 		if value is not None:
@@ -35,6 +36,11 @@ class Resource(object):
 		if not admin:
 			resp.status = falcon.HTTP_FORBIDDEN
 		return admin
+
+	def check_admin(self, req):
+		# type: (falcon.Request) -> None
+		if not req.context['user'].admin:
+			raise falcon.HTTPForbidden(description = 'Only an administrator can perform this action.')
 
 	def get_user(self, id_or_name):
 		# type: (str) -> DBUser

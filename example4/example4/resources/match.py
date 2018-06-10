@@ -58,17 +58,16 @@ class Match(Resource):
 
 	def on_patch(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		if not self.is_admin(req, resp):
-			return
+		self.check_admin(req)
 		session = self.session()
 		match = session.query(DBMatch).filter_by(id = id).one_or_none()
 		if match:
 			values = req.context['json']
 			# prevent setting result of future match!
 			if 'result' in values.keys() and self.now() < match.matchtime:
-				resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
-				#TODO pass error message?
-				return
+				raise falcon.HTTPUnprocessableEntity(
+					description = 'This match has not been played yet, it is not allowed to set its result.')
+
 			if update_item_fields(match, Match.patch_request_schema.fields, values):
 				# if result is known, then update result-dependent attributes
 				self._update_match_score(match)
