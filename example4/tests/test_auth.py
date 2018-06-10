@@ -4,17 +4,10 @@ from falcon import testing
 from falcon.testing import helpers
 import base64
 import json
-import pytest
 from datetime import datetime, timezone
 from dateutil.parser import parse as parse_date
 
-from example4.app import api
 from example4.utils.auth import hash_password, verify_password
-
-@pytest.fixture
-def client():
-    # type: () -> testing.TestClient
-    return testing.TestClient(api)
 
 def test_get_token_no_credentials(client):
 	response = client.simulate_get('/token')

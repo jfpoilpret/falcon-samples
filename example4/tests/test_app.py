@@ -1,34 +1,14 @@
 from datetime import datetime, timezone
 from dateutil.parser import parse as parse_date
-import base64
 import falcon
 from falcon import testing
 from falcon.testing import helpers
 import json
-import pytest
-from .utils import href, assert_dict, set_time_base, reset_time_base
+from .utils import href, assert_dict, set_time_base
 
-from example4.app import api
-
-@pytest.fixture
-def client():
-	# type: () -> testing.TestClient
-	client = testing.TestClient(api)
-	# authenticate admin
-	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
-	response = client.simulate_get('/token', headers = {
-		'Authorization': 'Basic %s' % token
-	})
-	assert response.status == falcon.HTTP_OK
-	token = json.loads(response.text)['token']
-	client._default_headers = {
-		'Authorization': 'Token %s' % token
-	}
-	yield client
-	reset_time_base(client)
-
-def test_get_time(client):
-	response = client.simulate_get('/time')
+def test_get_time(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/time')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -38,13 +18,14 @@ def test_get_time(client):
 	delta = now - datetime.now(timezone.utc)
 	assert -2 < delta.total_seconds() < +2
 
-def test_patch_time_base(client):
+def test_patch_time_base(admin_client):
+	# type: (testing.TestClient) -> None
 	base = '2018-01-01T14:30:00+00:00'
-	set_time_base(client, base)
+	set_time_base(admin_client, base)
 	base = parse_date(base)
 	delta = base - datetime.now(timezone.utc)
 
-	response = client.simulate_get('/time')
+	response = admin_client.simulate_get('/time')
 	assert response.status == falcon.HTTP_OK
 	actual = json.loads(response.text)
 	assert -2 < actual['delta'] - delta.total_seconds() < 2
@@ -53,18 +34,19 @@ def test_patch_time_base(client):
 	delta = base - now
 	assert -2 < delta.total_seconds() < +2
 
-	response = client.simulate_delete('/time')
+	response = admin_client.simulate_delete('/time')
 	assert response.status == falcon.HTTP_OK
 
-def test_patch_time_delta(client):
+def test_patch_time_delta(admin_client):
+	# type: (testing.TestClient) -> None
 	base = parse_date('2018-01-01T14:30:00+00:00')
 	delta = (base - datetime.now(timezone.utc)).total_seconds()
-	response = client.simulate_patch('/time', body = json.dumps({
+	response = admin_client.simulate_patch('/time', body = json.dumps({
 		'delta': delta
 	}))
 	assert response.status == falcon.HTTP_OK
 
-	response = client.simulate_get('/time')
+	response = admin_client.simulate_get('/time')
 	assert response.status == falcon.HTTP_OK
 	actual = json.loads(response.text)
 	assert -2 < actual['delta'] - delta < 2
@@ -73,11 +55,12 @@ def test_patch_time_delta(client):
 	delta = base - now
 	assert -2 < delta.total_seconds() < +2
 
-	response = client.simulate_delete('/time')
+	response = admin_client.simulate_delete('/time')
 	assert response.status == falcon.HTTP_OK
 
-def test_list_teams(client):
-	response = client.simulate_get('/team')
+def test_list_teams(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/team')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -115,8 +98,9 @@ def test_list_teams(client):
 	}
 	assert actual[31] == expected
     
-def test_get_team(client):
-	response = client.simulate_get('/team/11')
+def test_get_team(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/team/11')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -137,8 +121,9 @@ def test_get_team(client):
 	}
 	assert actual == expected
 
-def test_list_venues(client):
-	response = client.simulate_get('/venue')
+def test_list_venues(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/venue')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -156,8 +141,9 @@ def test_list_venues(client):
 	}
 	assert actual[11] == expected
     
-def test_get_venue(client):
-	response = client.simulate_get('/venue/5')
+def test_get_venue(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/venue/5')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -168,8 +154,9 @@ def test_get_venue(client):
 	}
 	assert actual == expected
 
-def test_list_matches(client):
-	response = client.simulate_get('/match')
+def test_list_matches(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/match')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -209,8 +196,9 @@ def test_list_matches(client):
 	}
 	assert_dict(expected, actual[48])
     
-def test_get_match(client):
-	response = client.simulate_get('/match/35')
+def test_get_match(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/match/35')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -234,10 +222,10 @@ def test_get_match(client):
 	}
 	assert_dict(expected, actual)
 
-def test_patch_match_time(client):
+def test_patch_match_time(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'matchtime': '2018-06-26T18:00:00+00:00'
 	}))
 	assert response.status == falcon.HTTP_OK
@@ -251,15 +239,15 @@ def test_patch_match_time(client):
 	}
 	assert_dict(expected, actual)
 
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'matchtime': '2018-06-25T18:00:00+00:00'
 	}))
 	assert response.status == falcon.HTTP_OK
 
-def test_patch_match_venue(client):
+def test_patch_match_venue(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 1
 	}))
 	assert response.status == falcon.HTTP_OK
@@ -277,15 +265,15 @@ def test_patch_match_venue(client):
 	}
 	assert_dict(expected, actual)
 
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 11
 	}))
 	assert response.status == falcon.HTTP_OK
 
-def test_patch_match_unknown_venue(client):
+def test_patch_match_unknown_venue(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'venue_id': 24
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
@@ -296,10 +284,10 @@ def test_patch_match_unknown_venue(client):
 	}
 	assert_dict(expected, actual)
 
-def test_patch_match_teams(client):
+def test_patch_match_teams(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 1,
 		'team2_id': 2
 	}))
@@ -322,16 +310,16 @@ def test_patch_match_teams(client):
 	}
 	assert_dict(expected, actual)
 
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 5,
 		'team2_id': 7
 	}))
 	assert response.status == falcon.HTTP_OK
 
-def test_patch_match_unknown_team(client):
+def test_patch_match_unknown_team(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-01T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-01T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 124
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
@@ -342,10 +330,10 @@ def test_patch_match_unknown_team(client):
 	}
 	assert_dict(expected, actual)
 
-def test_patch_match_result(client):
+def test_patch_match_result(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-26T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-26T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'result': '0-3'
 	}))
 	assert response.status == falcon.HTTP_OK
@@ -359,15 +347,15 @@ def test_patch_match_result(client):
 	}
 	assert_dict(expected, actual)
 
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'result': None
 	}))
 	assert response.status == falcon.HTTP_OK
 
-def test_patch_match_incorrect_result(client):
+def test_patch_match_incorrect_result(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-26T00:00:00+00:00')
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	set_time_base(admin_client, '2018-06-26T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'result': '0-X'
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
@@ -380,10 +368,10 @@ def test_patch_match_incorrect_result(client):
 	}
 	assert_dict(expected, actual)
 
-def test_patch_future_match_result(client):
+def test_patch_future_match_result(admin_client):
 	# type: (testing.TestClient) -> None
-	set_time_base(client, '2018-06-26T00:00:00+00:00')
-	response = client.simulate_patch('/match/64', body = json.dumps({
+	set_time_base(admin_client, '2018-06-26T00:00:00+00:00')
+	response = admin_client.simulate_patch('/match/64', body = json.dumps({
 		'result': '0-1'
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
@@ -394,9 +382,9 @@ def test_patch_future_match_result(client):
 	}
 	assert_dict(expected, actual)
 
-def test_patch_match_forbidden_field(client):
+def test_patch_match_forbidden_field(admin_client):
 	# type: (testing.TestClient) -> None
-	response = client.simulate_patch('/match/35', body = json.dumps({
+	response = admin_client.simulate_patch('/match/35', body = json.dumps({
 		'group': 'Group C'
 	}))
 	print(response.text)
@@ -410,8 +398,9 @@ def test_patch_match_forbidden_field(client):
 	}
 	assert_dict(expected, actual)
 
-def test_list_users(client):
-	response = client.simulate_get('/user')
+def test_list_users(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/user')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -428,8 +417,9 @@ def test_list_users(client):
 	# check password is not present
 	assert 'password' not in actual[0].keys()
     
-def test_get_user_by_id(client):
-	response = client.simulate_get('/user/1')
+def test_get_user_by_id(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/user/1')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -443,8 +433,9 @@ def test_get_user_by_id(client):
 	}
 	assert_dict(expected, actual)
 
-def test_get_user_by_login(client):
-	response = client.simulate_get('/user/jfpoilpret@gmail.com')
+def test_get_user_by_login(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/user/jfpoilpret@gmail.com')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
@@ -458,12 +449,14 @@ def test_get_user_by_login(client):
 	}
 	assert_dict(expected, actual)
 
-def test_get_user_by_bad_login(client):
-	response = client.simulate_get('/user/jfp@jfp.org')
+def test_get_user_by_bad_login(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_get('/user/jfp@jfp.org')
 	assert response.status == falcon.HTTP_NOT_FOUND
 
-def test_post_user(client):
-	response = client.simulate_post('/user', body = json.dumps({
+def test_post_user(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_post('/user', body = json.dumps({
 		'email': 'dummy@dummy.com',
 		'password': 'dummy',
 		'fullname': 'Dunny D. Dummy',
@@ -489,11 +482,12 @@ def test_post_user(client):
 	assert -2 < delta.total_seconds() < +2
 
 	# delete user
-	response = client.simulate_delete('/user/%d' % user['id'])
+	response = admin_client.simulate_delete('/user/%d' % user['id'])
 	assert response.status == falcon.HTTP_NO_CONTENT
 
-def test_patch_user(client):
-	response = client.simulate_patch('/user/jfpoilpret@gmail.com', body = json.dumps({
+def test_patch_user(admin_client):
+	# type: (testing.TestClient) -> None
+	response = admin_client.simulate_patch('/user/jfpoilpret@gmail.com', body = json.dumps({
 		'email': 'jfp@gmail.com',
 		'password': 'jfpjfp',
 		'fullname': 'Dunny D. Dummy',
@@ -511,7 +505,7 @@ def test_patch_user(client):
 	}
 	assert_dict(expected, user)
 
-	response = client.simulate_patch('/user/jfp@gmail.com', body = json.dumps({
+	response = admin_client.simulate_patch('/user/jfp@gmail.com', body = json.dumps({
 		'email': 'jfpoilpret@gmail.com',
 		'password': 'jfp',
 		'fullname': 'Jean-Francois Poilpret',
