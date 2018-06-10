@@ -1,6 +1,8 @@
 import io
 from datetime import datetime, timezone
 import logging
+from sqlalchemy.orm.session import Session
+from sqlalchemy.sql import func
 
 from .model import DBTeam, DBVenue, DBMatch, DBUser
 from .utils.auth import hash_password
@@ -8,12 +10,19 @@ from .utils.auth import hash_password
 logger = logging.getLogger(__name__)
 
 def init_db(session):
-	init_teams(session)
-	init_venues(session)
-	init_matches(session)
-	init_users(session)
+	# type: (Session) -> None
+	# Check if DB is empty
+	if not session.query(func.count('*')).select_from(DBTeam).scalar():
+		init_teams(session)
+	if not session.query(func.count('*')).select_from(DBVenue).scalar():
+		init_venues(session)
+	if not session.query(func.count('*')).select_from(DBMatch).scalar():
+		init_matches(session)
+	if not session.query(func.count('*')).select_from(DBUser).scalar():
+		init_users(session)
 
 def init_teams(session):
+	# type: (Session) -> None
 	with io.open('example4/data/teams.txt') as f:
 		for line in f:
 			fields = line[:-1].split('\t')
@@ -21,6 +30,7 @@ def init_teams(session):
 	session.commit()
 
 def init_venues(session):
+	# type: (Session) -> None
 	with io.open('example4/data/venues.txt') as f:
 		for line in f:
 			name = line[:-1]
@@ -28,6 +38,7 @@ def init_venues(session):
 	session.commit()
 
 def init_users(session):
+	# type: (Session) -> None
 	with io.open('example4/data/users.txt') as f:
 		for line in f:
 			fields = line[:-1].split('\t')
@@ -43,6 +54,7 @@ def init_users(session):
 
 #TODO make TZ offset configurable?
 def init_matches(session):
+	# type: (Session) -> None
 	with io.open('example4/data/matches.txt') as f:
 		num = 1
 		for line in f:

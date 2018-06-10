@@ -40,17 +40,20 @@ def create_app():
 	engine = create_engine(database)
 	sql_middleware = SqlAlchemy(engine)
 
-	# Create DB if required
-	#TODO make it smarter: drop if required (DEV, TEST, TRAIN...), create and init if not exists
+	# Drop DB if required
 	if config.drop_db:
 		logger.debug('Dropping current DB...')
 		drop_db(engine)
 		logger.debug('Current DB dropped. Recreating new DB...')
-		create_db(engine)
-		logger.debug('New DB recreated. Initializing DB content.')
-		init_db(sql_middleware.new_session())
-		logger.debug('DB content initialized.')
-		sql_middleware.delete_session()
+	else:
+		logger.debug('Creating DB if not present')
+
+	# Create DB if needed
+	create_db(engine)
+	logger.debug('DB created (if needed). Initializing DB content if needed.')
+	init_db(sql_middleware.new_session())
+	logger.debug('DB content initialized (if needed).')
+	sql_middleware.delete_session()	
 
 	# Create TimeBase service
 	timebase = TimeBase()
