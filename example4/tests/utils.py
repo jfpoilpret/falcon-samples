@@ -6,15 +6,11 @@ from falcon import testing
 from falcon.testing import helpers
 import json
 import pytest
-from dateutil.parser import parse as parse_date
 
 logger = logging.getLogger(__name__)
 
 def href(path):
     return 'http://' + helpers.DEFAULT_HOST + path
-
-def json_to_datetime(dt):
-	return parse_date(dt)
 
 def assert_dict(expected, actual):
 	for key, value in expected.items():

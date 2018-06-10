@@ -6,7 +6,7 @@ from falcon import testing
 from falcon.testing import helpers
 import json
 import pytest
-from .utils import href, json_to_datetime, assert_dict, set_time_base, reset_time_base
+from .utils import href, assert_dict, set_time_base, reset_time_base
 
 from example4.app import api
 
@@ -34,7 +34,7 @@ def test_get_time(client):
 	actual = json.loads(response.text)
 	assert actual['delta'] == 0
 
-	now = json_to_datetime(actual['now'])
+	now = parse_date(actual['now'])
 	delta = now - datetime.now(timezone.utc)
 	assert -2 < delta.total_seconds() < +2
 
@@ -49,7 +49,7 @@ def test_patch_time_base(client):
 	actual = json.loads(response.text)
 	assert -2 < actual['delta'] - delta.total_seconds() < 2
 
-	now = json_to_datetime(actual['now'])
+	now = parse_date(actual['now'])
 	delta = base - now
 	assert -2 < delta.total_seconds() < +2
 
@@ -69,7 +69,7 @@ def test_patch_time_delta(client):
 	actual = json.loads(response.text)
 	assert -2 < actual['delta'] - delta < 2
 
-	now = json_to_datetime(actual['now'])
+	now = parse_date(actual['now'])
 	delta = base - now
 	assert -2 < delta.total_seconds() < +2
 
@@ -483,7 +483,10 @@ def test_post_user(client):
 	}
 	assert_dict(expected, user)
 
-	#TODO check creation date
+	# check creation date
+	creation = parse_date(user['creation'])
+	delta = creation - datetime.now(timezone.utc)
+	assert -2 < delta.total_seconds() < +2
 
 	# delete user
 	response = client.simulate_delete('/user/%d' % user['id'])
