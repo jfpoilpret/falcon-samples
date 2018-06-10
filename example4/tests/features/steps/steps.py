@@ -20,7 +20,7 @@ def start_system(context):
 	context.api = api = create_app()
 	client = testing.TestClient(api)
 	# authenticate admin
-	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
@@ -36,17 +36,16 @@ def add_user(context, user):
 	# type: (Context, str) -> None
 	# create user
 	response = context.admin.simulate_post('/user', body = json.dumps({
-		'login': user,
+		'email': '%s@dummy.com' % user,
 		'password': user,
 		'status': 'approved',
 		'fullname': 'John %s Doe' % user,
-		'email': '%s@dummy.com' % user
 	}))
 	user_id = json.loads(response.text)['id']
 
 	# authenticate new user
 	client = testing.TestClient(context.api)
-	token = '%s:%s' % (user, user)
+	token = '%s@dummy.com:%s' % (user, user)
 	token = base64.b64encode(token.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
@@ -140,7 +139,7 @@ def check_bets(context, user):
 def check_user_score(context, user, score):
 	# type: (Context, str, int) -> None
 	client = context.admin
-	response = client.simulate_get('/user/%s' % user)
+	response = client.simulate_get('/user/%s@dummy.com' % user)
 	assert response.status == falcon.HTTP_OK
 	the_user = json.loads(response.text)
 	print("actual score %d" % the_user['score'])

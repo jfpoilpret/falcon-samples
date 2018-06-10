@@ -69,19 +69,18 @@ class DBUser(Base):
 	__tablename__ = 'user'
 
 	id = Column(Integer, primary_key = True)
-	login = Column(String(50), nullable = False, unique = True)
+	email = Column(String(100), nullable = False, unique = True)
 	password = Column(String(250), nullable = False)
 	status = Column(Enum('pending', 'approved', 'suspended'), nullable = False)
 	admin = Column(Boolean, nullable = False, default = False)
 	fullname = Column(String(100), nullable = False, unique = True)
-	email = Column(String(100), unique = True)
 	score = Column(Integer, default = 0)
 	creation = Column(DateTime, nullable = False)
 	connection = Column(DateTime)
 
 	def __repr__(self):
-		return 'User(id = %d, login = %s, fullname = %s, status = %s, admin = %s, creation = %s, connection = %s)' % (
-			self.id, self.login, self.fullname, self.status, str(self.admin), 
+		return 'User(id = %d, email = %s, fullname = %s, status = %s, admin = %s, creation = %s, connection = %s)' % (
+			self.id, self.email, self.fullname, self.status, str(self.admin), 
 			self.creation.isoformat(), 
 			self.connection.isoformat() if self.connection else 'never')
 
@@ -121,7 +120,7 @@ class DBBet(Base):
 	def __repr__(self):
 		return 'Bet(id = %d, date = %s, user = %s (%d), match = %s-%s (%d), result = %s)' % (
 			self.id, self.bettime.isoformat() if self.bettime else 'no bet', 
-			self.better.login, self.better_id,
+			self.better.email, self.better_id,
 			self.match.team1.name, self.match.team2.name, self.result or 'unknown')
 	
 # Utility methods to create/drop DB schema from ORM mappings

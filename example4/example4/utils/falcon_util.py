@@ -39,7 +39,7 @@ class LoggingMiddleware(object):
 		# type: (Request, Response, object, bool) -> None
 		if 'user' in req.context.keys():
 			user = req.context['user']
-			user = '%s (%d)' % (user.login, user.id)
+			user = '%s (%d)' % (user.email, user.id)
 		else:
 			user = 'no user'
 		logger.debug('Response for: %s %s %s for %s', req.method, req.uri, 'succeeded' if req_succeeded else 'failed', user)

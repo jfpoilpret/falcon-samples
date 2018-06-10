@@ -92,7 +92,7 @@ class Authenticator(object):
 		# type: (str, str) -> DBUser
 		logger.debug('authenticate_user_password(%s)', username)
 		session = self._sql_middleware.new_session()
-		user = session.query(DBUser).filter_by(login = username).one_or_none()
+		user = session.query(DBUser).filter_by(email = username).one_or_none()
 		if user and user.status == 'approved' and verify_password(user.password, password):
 			logger.debug('User %s successfully authenticated', username)
 			# log last connection time

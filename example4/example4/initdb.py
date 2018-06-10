@@ -42,13 +42,12 @@ def init_users(session):
 	with io.open('example4/data/users.txt') as f:
 		for line in f:
 			fields = line[:-1].split('\t')
-			user = DBUser(  login = fields[0],
+			user = DBUser(  email = fields[0],
 							password = hash_password(fields[1]),
 							status = fields[2],
 							admin = fields[3].lower() in ('yes', 'true', '1'),
 							fullname = fields[4],
-							email = fields[5],
-							creation = datetime.strptime(fields[6], '%d/%m/%Y %H:%M'))
+							creation = datetime.strptime(fields[5], '%d/%m/%Y %H:%M'))
 			session.add(user)
 	session.commit()
 

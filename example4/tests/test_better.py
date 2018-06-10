@@ -13,7 +13,7 @@ def admin_client():
 	# type: () -> testing.TestClient
 	client = testing.TestClient(api)
 	# authenticate admin
-	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
@@ -30,11 +30,10 @@ def admin_client():
 def new_user(admin_client):
 	# create new user for the tests
 	response = admin_client.simulate_post('/user', body = json.dumps({
-		'login': 'better',
-		'password': 'better',
+		'email': 'john@doe.com',
+		'password': 'john@doe.com',
 		'status': 'approved',
 		'fullname': 'John Doe',
-		'email': 'john@doe.com'
 	}))
 	assert response.status == falcon.HTTP_CREATED
 	user = json.loads(response.text)
@@ -47,7 +46,7 @@ def better_client(new_user):
 	# type: () -> testing.TestClient
 	client = testing.TestClient(api)
 	# authenticate new user
-	token = '%s:%s' % (new_user['login'], new_user['login'])
+	token = '%s:%s' % (new_user['email'], new_user['email'])
 	token = base64.b64encode(token.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token

@@ -8,32 +8,29 @@ from ..model import DBBet, DBMatch, DBUser
 class UserSchema(StrictSchema):
 	id = fields.Integer()
 	href = URLFor('/user/{id}')
-	login = fields.String()
+	email = fields.Email()
 	password = fields.String()
 	status = fields.String()
 	admin = fields.Boolean()
 	fullname = fields.String()
-	email = fields.Email()
 	bets = URLFor('/bets')
 	score = fields.Integer()
 	creation = fields.DateTime()
 	connection = fields.DateTime()
 
 class UserPostSchema(StrictSchema):
-	login = fields.String(required = True)
+	email = fields.Email(required = True)
 	password = fields.String(required = True)
 	status = fields.String()
 	admin = fields.Boolean()
 	fullname = fields.String(required = True)
-	email = fields.Email(required = True)
 
 class UserPatchSchema(StrictSchema):
-	login = fields.String()
+	email = fields.Email()
 	password = fields.String()
 	status = fields.String()
 	admin = fields.Boolean()
 	fullname = fields.String()
-	email = fields.Email()
 
 class Users(Resource):
 	schema = UserSchema()

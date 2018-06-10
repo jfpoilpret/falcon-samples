@@ -47,4 +47,4 @@ class Resource(object):
 		if id_or_name.isnumeric():
 			return self.session().query(DBUser).filter_by(id = int(id_or_name)).one_or_none()
 		else:
-			return self.session().query(DBUser).filter_by(login = id_or_name).one_or_none()
+			return self.session().query(DBUser).filter_by(email = id_or_name).one_or_none()

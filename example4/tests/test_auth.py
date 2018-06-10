@@ -21,21 +21,21 @@ def test_get_token_no_credentials(client):
 	assert response.status == falcon.HTTP_UNAUTHORIZED
 
 def test_get_token_bad_login(client):
-	token = base64.b64encode('dummy:xxx'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('dummy@dummy.org:xxx'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
 	assert response.status == falcon.HTTP_UNAUTHORIZED
 
 def test_get_token_bad_password(client):
-	token = base64.b64encode('jfpoilpret:xxx'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:xxx'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
 	assert response.status == falcon.HTTP_UNAUTHORIZED
 
 def test_get_token_good_credentials(client):
-	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
@@ -51,7 +51,7 @@ def test_get_token_good_credentials(client):
 	assert 86350 < delta.total_seconds() < 86450
 
 def test_other_resource_basic_credentials(client):
-	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/venue/5', headers = {
 		'Authorization': 'Basic %s' % token
 	})
@@ -69,7 +69,7 @@ def test_other_resource_bad_token(client):
 	assert response.status == falcon.HTTP_UNAUTHORIZED
 
 def test_other_resource_correct_token(client):
-	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
@@ -90,10 +90,9 @@ def test_other_resource_correct_token(client):
 
 def test_post_user_no_auth(client):
 	response = client.simulate_post('/user', body = json.dumps({
-		'login': 'dummy',
+		'email': 'dummy@dummy.com',
 		'password': 'dummy',
 		'fullname': 'Dunny D. Dummy',
-		'email': 'dummy@dummy.com'
 	}))
 	assert response.status == falcon.HTTP_UNAUTHORIZED
 

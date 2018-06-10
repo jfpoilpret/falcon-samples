@@ -15,7 +15,7 @@ def client():
 	# type: () -> testing.TestClient
 	client = testing.TestClient(api)
 	# authenticate admin
-	token = base64.b64encode('jfpoilpret:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
+	token = base64.b64encode('jfpoilpret@gmail.com:jfp'.encode('utf-8')).decode('utf-8', 'ignore')
 	response = client.simulate_get('/token', headers = {
 		'Authorization': 'Basic %s' % token
 	})
@@ -419,12 +419,13 @@ def test_list_users(client):
 	expected = {
 		'href': href('/user/1'),
 		'id': 1,
-		'login': 'jfpoilpret',
+		'email': 'jfpoilpret@gmail.com',
 		'fullname': 'Jean-Francois Poilpret',
 		'admin': True,
 		'status': 'approved',
 	}
 	assert_dict(expected, actual[0])
+	#TODO check password is not present
     
 def test_get_user_by_id(client):
 	response = client.simulate_get('/user/1')
@@ -434,7 +435,7 @@ def test_get_user_by_id(client):
 	expected = {
 		'href': href('/user/1'),
 		'id': 1,
-		'login': 'jfpoilpret',
+		'email': 'jfpoilpret@gmail.com',
 		'fullname': 'Jean-Francois Poilpret',
 		'admin': True,
 		'status': 'approved',
@@ -442,14 +443,14 @@ def test_get_user_by_id(client):
 	assert_dict(expected, actual)
 
 def test_get_user_by_login(client):
-	response = client.simulate_get('/user/jfpoilpret')
+	response = client.simulate_get('/user/jfpoilpret@gmail.com')
 	assert response.status == falcon.HTTP_OK
 
 	actual = json.loads(response.text)
 	expected = {
 		'href': href('/user/1'),
 		'id': 1,
-		'login': 'jfpoilpret',
+		'email': 'jfpoilpret@gmail.com',
 		'fullname': 'Jean-Francois Poilpret',
 		'admin': True,
 		'status': 'approved'
@@ -457,15 +458,14 @@ def test_get_user_by_login(client):
 	assert_dict(expected, actual)
 
 def test_get_user_by_bad_login(client):
-	response = client.simulate_get('/user/jfp')
+	response = client.simulate_get('/user/jfp@jfp.org')
 	assert response.status == falcon.HTTP_NOT_FOUND
 
 def test_post_user(client):
 	response = client.simulate_post('/user', body = json.dumps({
-		'login': 'dummy',
+		'email': 'dummy@dummy.com',
 		'password': 'dummy',
 		'fullname': 'Dunny D. Dummy',
-		'email': 'dummy@dummy.com',
 		'admin': True,
 		'status': 'approved'
 	}))
@@ -473,9 +473,8 @@ def test_post_user(client):
 	
 	user =  json.loads(response.text)
 	expected = {
-		'login': 'dummy',
-		'fullname': 'Dunny D. Dummy',
 		'email': 'dummy@dummy.com',
+		'fullname': 'Dunny D. Dummy',
 		'admin': True,
 		'status': 'approved',
 		'score': 0,
@@ -493,11 +492,10 @@ def test_post_user(client):
 	assert response.status == falcon.HTTP_NO_CONTENT
 
 def test_patch_user(client):
-	response = client.simulate_patch('/user/jfpoilpret', body = json.dumps({
-		'login': 'dummy',
+	response = client.simulate_patch('/user/jfpoilpret@gmail.com', body = json.dumps({
+		'email': 'jfp@gmail.com',
 		'password': 'jfpjfp',
 		'fullname': 'Dunny D. Dummy',
-		'email': 'jfp@gmail.com',
 		'admin': True,
 		'status': 'approved'
 	}))
@@ -505,19 +503,17 @@ def test_patch_user(client):
 	
 	user =  json.loads(response.text)
 	expected = {
-		'login': 'dummy',
-		'fullname': 'Dunny D. Dummy',
 		'email': 'jfp@gmail.com',
+		'fullname': 'Dunny D. Dummy',
 		'admin': True,
 		'status': 'approved'
 	}
 	assert_dict(expected, user)
 
-	response = client.simulate_patch('/user/dummy', body = json.dumps({
-		'login': 'jfpoilpret',
+	response = client.simulate_patch('/user/jfp@gmail.com', body = json.dumps({
+		'email': 'jfpoilpret@gmail.com',
 		'password': 'jfp',
 		'fullname': 'Jean-Francois Poilpret',
-		'email': 'jfpoilpret@gmail.com',
 		'admin': True,
 		'status': 'approved'
 	}))
