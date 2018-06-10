@@ -11,6 +11,7 @@ DEV:
   log_style: '%'
   log_dateformat: '%Y-%m-%d %H:%M:%S'
   timebase_changes: true
+  matches_txt_timezone: '+0300'
 
 TEST:
 

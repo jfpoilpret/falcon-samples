@@ -9,15 +9,15 @@ from .utils.auth import hash_password
 
 logger = logging.getLogger(__name__)
 
-def init_db(session):
-	# type: (Session) -> None
+def init_db(session, tz):
+	# type: (Session, str) -> None
 	# Check if DB is empty
 	if not session.query(func.count('*')).select_from(DBTeam).scalar():
 		init_teams(session)
 	if not session.query(func.count('*')).select_from(DBVenue).scalar():
 		init_venues(session)
 	if not session.query(func.count('*')).select_from(DBMatch).scalar():
-		init_matches(session)
+		init_matches(session, tz)
 	if not session.query(func.count('*')).select_from(DBUser).scalar():
 		init_users(session)
 
@@ -52,9 +52,8 @@ def init_users(session):
 			session.add(user)
 	session.commit()
 
-#TODO make TZ offset configurable?
-def init_matches(session):
-	# type: (Session) -> None
+def init_matches(session, tz):
+	# type: (Session, str) -> None
 	with io.open('example4/data/matches.txt') as f:
 		num = 1
 		for line in f:
@@ -62,7 +61,7 @@ def init_matches(session):
 			venue = session.query(DBVenue).filter_by(name = fields[2]).one_or_none()
 			team1 = session.query(DBTeam).filter_by(name = fields[3]).one_or_none()
 			team2 = session.query(DBTeam).filter_by(name = fields[4]).one_or_none()
-			matchtime = datetime.strptime(fields[1] + ' +0300', '%d/%m/%Y %H:%M %z').astimezone(timezone.utc).replace(tzinfo = None)
+			matchtime = datetime.strptime(fields[1] + ' ' + tz, '%d/%m/%Y %H:%M %z').astimezone(timezone.utc).replace(tzinfo = None)
 			match = DBMatch(matchnumber = num,
 							round = fields[0],
 							matchtime = matchtime,

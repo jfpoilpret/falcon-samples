@@ -54,6 +54,10 @@ class Configuration(object):
 	def timebase_changes(self):
 		return self._value('timebase_changes', False)
 
+	@property
+	def matches_txt_timezone(self):
+		return self._value('matches_txt_timezone')
+
 	def _value(self, key, default = None):
 		return self._config[key] if key in self._config else default
 	

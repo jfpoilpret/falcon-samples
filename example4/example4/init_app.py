@@ -51,9 +51,9 @@ def create_app():
 	# Create DB if needed
 	create_db(engine)
 	logger.debug('DB created (if needed). Initializing DB content if needed.')
-	init_db(sql_middleware.new_session())
+	init_db(sql_middleware.new_session(), config.matches_txt_timezone)
 	logger.debug('DB content initialized (if needed).')
-	sql_middleware.delete_session()	
+	sql_middleware.delete_session()
 
 	# Create TimeBase service
 	timebase = TimeBase()
