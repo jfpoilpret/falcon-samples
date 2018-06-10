@@ -289,6 +289,12 @@ def test_patch_match_unknown_venue(client):
 		'venue_id': 24
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+	actual = json.loads(response.text)
+	print('actual %s' % str(actual))
+	expected = {
+		'title': 'Integrity constraint error'
+	}
+	assert_dict(expected, actual)
 
 def test_patch_match_teams(client):
 	# type: (testing.TestClient) -> None
@@ -322,13 +328,19 @@ def test_patch_match_teams(client):
 	}))
 	assert response.status == falcon.HTTP_OK
 
-def test_patch_match_unknown_match(client):
+def test_patch_match_unknown_team(client):
 	# type: (testing.TestClient) -> None
 	set_time_base(client, '2018-06-01T00:00:00+00:00')
 	response = client.simulate_patch('/match/35', body = json.dumps({
 		'team1_id': 124
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+	actual = json.loads(response.text)
+	print('actual %s' % str(actual))
+	expected = {
+		'title': 'Integrity constraint error'
+	}
+	assert_dict(expected, actual)
 
 def test_patch_match_result(client):
 	# type: (testing.TestClient) -> None
@@ -359,6 +371,14 @@ def test_patch_match_incorrect_result(client):
 		'result': '0-X'
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+	actual = json.loads(response.text)
+	print('actual %s' % str(actual))
+	expected = {
+		'description': json.dumps({
+			'result': ['result must comply to format "0-0"']
+		})
+	}
+	assert_dict(expected, actual)
 
 def test_patch_future_match_result(client):
 	# type: (testing.TestClient) -> None
@@ -367,6 +387,12 @@ def test_patch_future_match_result(client):
 		'result': '0-1'
 	}))
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
+	actual = json.loads(response.text)
+	print('actual %s' % str(actual))
+	expected = {
+		'description': 'This match has not been played yet, it is not allowed to set its result.'
+	}
+	assert_dict(expected, actual)
 
 def test_patch_match_forbidden_field(client):
 	# type: (testing.TestClient) -> None
@@ -376,6 +402,7 @@ def test_patch_match_forbidden_field(client):
 	print(response.text)
 	assert response.status == falcon.HTTP_UNPROCESSABLE_ENTITY
 	actual = json.loads(response.text)
+	print('actual %s' % str(actual))
 	expected = {
 		'description': json.dumps({
 			"group": ["Unknown field"]

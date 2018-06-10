@@ -22,4 +22,4 @@ class Venue(Resource):
 
 	def on_get(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		self.result(req, resp, self.session().query(DBVenue).filter_by(id = id).one_or_none())
+		self.check_and_set_result(req, 'venue', self.session().query(DBVenue).filter_by(id = id).one_or_none())

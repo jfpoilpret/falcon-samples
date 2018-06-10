@@ -81,16 +81,14 @@ class User(Resource):
 
 	def on_get(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, str) -> None
-		self.result(req, resp, self.get_user(id_or_name))
+		self.check_and_set_result(req, 'user', self.get_user(id_or_name))
 
 	def on_patch(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, int) -> None
 		# only admin or user can modify himself
-		user = self.result(req, resp, self.get_user(id_or_name))
-		if not user:
-			return
+		user = self.check_result('user', self.get_user(id_or_name))
 		values = req.context['json']
-		if self.is_admin(req, resp):
+		if self.is_admin(req):
 			pass
 		elif req.context['user'].id == user.id:
 			# check only some fields (fullname, password) are patched
@@ -99,7 +97,8 @@ class User(Resource):
 				raise falcon.HTTPUnprocessableEntity('The following fields cannot be patched: %s' % ','.join(extra))
 		else:
 			# user is neither admin nor owner of the patched user
-			return
+			raise falcon.HTTPForbidden(description = 'Only an administrator can perform this action.')
+
 		# hash password if modified
 		if 'password' in values.keys():
 			values['password'] = hash_password(values['password'])
@@ -113,9 +112,7 @@ class User(Resource):
 	def on_delete(self, req, resp, id_or_name):
 		# type: (falcon.Request, falcon.Response, str) -> None
 		self.check_admin(req)
-		user = self.result(req, resp, self.get_user(id_or_name))
-		if not user:
-			return
+		user = self.check_result('user', self.get_user(id_or_name))
 		# delete all bets
 		self.session().query(DBBet).filter_by(better_id = user.id).delete(synchronize_session = False)
 		self.session().delete(user)

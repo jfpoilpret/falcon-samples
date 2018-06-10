@@ -31,5 +31,5 @@ class Team(Resource):
 
 	def on_get(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		self.result(req, resp,
+		self.check_and_set_result(req, 'team',
 			self.session().query(DBTeam).filter(DBTeam.id == id, DBTeam.group != 'virtual').one_or_none())

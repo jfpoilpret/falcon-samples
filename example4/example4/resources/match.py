@@ -54,50 +54,46 @@ class Match(Resource):
 
 	def on_get(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
-		self.result(req, resp, self.session().query(DBMatch).filter_by(id = id).one_or_none())
+		self.check_and_set_result(req, 'match', self.session().query(DBMatch).filter_by(id = id).one_or_none())
 
 	def on_patch(self, req, resp, id):
 		# type: (falcon.Request, falcon.Response, int) -> None
 		self.check_admin(req)
 		session = self.session()
-		match = session.query(DBMatch).filter_by(id = id).one_or_none()
-		if match:
-			values = req.context['json']
-			# prevent setting result of future match!
-			if 'result' in values.keys() and self.now() < match.matchtime:
-				raise falcon.HTTPUnprocessableEntity(
-					description = 'This match has not been played yet, it is not allowed to set its result.')
+		match = self.check_result('match', session.query(DBMatch).filter_by(id = id).one_or_none())
+		values = req.context['json']
+		# prevent setting result of future match!
+		if 'result' in values.keys() and self.now() < match.matchtime:
+			raise falcon.HTTPUnprocessableEntity(
+				description = 'This match has not been played yet, it is not allowed to set its result.')
 
-			if update_item_fields(match, Match.patch_request_schema.fields, values):
-				# if result is known, then update result-dependent attributes
-				self._update_match_score(match)
-				# save match changes
-				session.add(match)
-				session.commit()
-				session.refresh(match)
+		if update_item_fields(match, Match.patch_request_schema.fields, values):
+			# if result is known, then update result-dependent attributes
+			self._update_match_score(match)
+			# save match changes
+			session.add(match)
+			session.commit()
+			session.refresh(match)
 
-				if match.result:
-					if match.round in ['1', '2', '3']:
-						# if this is a group match, then update points for team1 and teams2
-						self._update_team_score(match.team1)
-						self._update_team_score(match.team2)
-						self._update_group_ranking(match.group)
-						if match.round == '3':
-							# update next round (round of 16) if whole group is played
-							self._update_round_of_16(match.group)
-					else:
-						# during knockout phase, every match result provides one team for a future match
-						self._update_next_round(match)
+			if match.result:
+				if match.round in ['1', '2', '3']:
+					# if this is a group match, then update points for team1 and teams2
+					self._update_team_score(match.team1)
+					self._update_team_score(match.team2)
+					self._update_group_ranking(match.group)
+					if match.round == '3':
+						# update next round (round of 16) if whole group is played
+						self._update_round_of_16(match.group)
+				else:
+					# during knockout phase, every match result provides one team for a future match
+					self._update_next_round(match)
 
-					# Update all bets for this match
-					self._update_bets_score(match)
+				# Update all bets for this match
+				self._update_bets_score(match)
 
-					# Update score of all betters
-					self._update_users_score()
-
-			req.context['result'] = match
-		else:
-			resp.status = falcon.HTTP_NOT_FOUND
+				# Update score of all betters
+				self._update_users_score()
+		req.context['result'] = match
 
 	def _update_match_score(self, match):
 		# type: (DBMatch) -> None

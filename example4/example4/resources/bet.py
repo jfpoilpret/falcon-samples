@@ -51,9 +51,9 @@ class Bets(Resource):
 		# check all bets to be patched belong to current user
 		bad_ids = new_bets.keys() - bets.keys()
 		if bad_ids:
-			resp.status = falcon.HTTP_FORBIDDEN
-			#TODO add error message?
-			return
+			raise falcon.HTTPForbidden(description = \
+				'The following bets ids do not exist (or do not belong to you): %s' % ','.join(map(str, bad_ids)))
+
 		# filter bets to be changed
 		patched_bets = {id: bet for id, bet in bets.items() if id in new_bets.keys()}
 
@@ -61,17 +61,17 @@ class Bets(Resource):
 		now = self.now()
 		past_match_ids = [id for id, bet in patched_bets.items() if bet.match.matchtime <= now]
 		if past_match_ids:
-			resp.status = falcon.HTTP_FORBIDDEN
-			#TODO add error message?
-			return
+			raise falcon.HTTPForbidden(description = \
+				'The following bets ids are related to past matches, ' + \
+				'you are not allowed to place bets on them: %s' % ','.join(map(str, past_match_ids)))
 			
 		# ensure match is already known (teams not "virtual")
 		unknown_match_ids = [id for id, bet in patched_bets.items() 
 			if bet.match.team1.group == 'virtual' or bet.match.team2.group == 'virtual']
 		if unknown_match_ids:
-			resp.status = falcon.HTTP_UNPROCESSABLE_ENTITY
-			#TODO add error message?
-			return
+			raise falcon.HTTPUnprocessableEntity(
+				description = 'The following bets ids relate to match which teams are still not known, ' + \
+				'you are not allowed to place bets on them: %s' % ','.join(map(str, unknown_match_ids)))
 		
 		# update patched bets
 		session = self.session()

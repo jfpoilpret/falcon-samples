@@ -21,21 +21,21 @@ class Resource(object):
 		# type: () -> Session
 		return self._session
 	
-	#TODO raise exception instead
-	def result(self, req, resp, value):
-		# type: (falcon.Request, falcon.Response, object) -> object
-		if value is not None:
-			req.context['result'] = value
-		else:
-			resp.status = falcon.HTTP_NOT_FOUND
+	def check_result(self, item_name, value):
+		# type: (str, object) -> object
+		if value is None:
+			raise falcon.HTTPNotFound(description = 'This %s does not exist' % item_name)
 		return value
 
-	def is_admin(self, req, resp):
-		# type: (falcon.Request, falcon.Response) -> bool
-		admin = req.context['user'].admin
-		if not admin:
-			resp.status = falcon.HTTP_FORBIDDEN
-		return admin
+	def check_and_set_result(self, req, item_name, value):
+		# type: (falcon.Request, str, object) -> object
+		value = self.check_result(item_name, value)
+		req.context['result'] = value
+		return value
+
+	def is_admin(self, req):
+		# type: (falcon.Request) -> bool
+		return req.context['user'].admin
 
 	def check_admin(self, req):
 		# type: (falcon.Request) -> None
