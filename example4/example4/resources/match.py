@@ -141,15 +141,19 @@ class Match(Resource):
 						DBTeam.goals_for.desc()).all()
 		rank = 0
 		points = goals_diff = goals_for = -100
+		same_ranks = 1
 		for team in teams:
 			logger.debug('Group "%s": team %s' % (group, str(team)))
-			#TODO if several teams have the same rank then the next rank should be more than rank+1, e.g. 1,1,3,4
+			# if several teams have the same rank then the next rank should be more than rank+1, e.g. 1,1,3,4
 			if	team.points != points \
 				or team.goals_diff != goals_diff or team.goals_for != goals_for:
-				rank = rank + 1
+				rank = rank + same_ranks
 				points = team.points
 				goals_diff = team.goals_diff
 				goals_for = team.goals_for
+				same_ranks = 1
+			else:
+				same_ranks = same_ranks + 1
 			team.rank = rank
 			self.session().add(team)
 			self.session().commit()
@@ -173,7 +177,7 @@ class Match(Resource):
 			if len(rank2) == 1:
 				# Find the next match for this result
 				self._update_match_team('Runner-up %s' % group, rank2[0])
-		#TODO if ranking not unique, record an action for administrator
+		#TODO LATER if ranking not unique, record an action for administrator
 
 	def _update_next_round(self, match):
 		# type: (DBMatch) -> None
@@ -224,7 +228,6 @@ class Match(Resource):
 
 	def _update_users_score(self):
 		# type: () -> None
-		#TODO limit update to users with bets for the current updated match (other users shall not change)
 		# batch update of all users 
 		bets = inspect(DBBet).local_table
 		users = inspect(DBUser).local_table

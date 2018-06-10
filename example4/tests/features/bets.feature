@@ -93,8 +93,8 @@ Feature: Place bets on matches and get score after matches play
 			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
 			| 1    | Russia       | 1   | 1 | 0 | 0 | 2  | 1  | 1  | 3   |
 			| 1    | Uruguay      | 1   | 1 | 0 | 0 | 2  | 1  | 1  | 3   |
-			| 2    | Egypt        | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
-			| 2    | Saudi Arabia | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
+			| 3    | Egypt        | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
+			| 3    | Saudi Arabia | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
 		When match results are
 			| round | match                  | result |
 			| 2     | Russia - Egypt         | 2-1    |
@@ -103,8 +103,8 @@ Feature: Place bets on matches and get score after matches play
 			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
 			| 1    | Russia       | 2   | 2 | 0 | 0 | 4  | 2  | 2  | 6   |
 			| 1    | Uruguay      | 2   | 2 | 0 | 0 | 4  | 2  | 2  | 6   |
-			| 2    | Egypt        | 2   | 0 | 0 | 2 | 2  | 4  | -2 | 0   |
-			| 2    | Saudi Arabia | 2   | 0 | 0 | 2 | 2  | 4  | -2 | 0   |
+			| 3    | Egypt        | 2   | 0 | 0 | 2 | 2  | 4  | -2 | 0   |
+			| 3    | Saudi Arabia | 2   | 0 | 0 | 2 | 2  | 4  | -2 | 0   |
 		When match results are
 			| round | match                | result |
 			| 3     | Uruguay - Russia     | 2-2    |
@@ -113,8 +113,8 @@ Feature: Place bets on matches and get score after matches play
 			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
 			| 1    | Uruguay      | 3   | 2 | 1 | 0 | 6  | 4  | 2  | 7   |
 			| 1    | Russia       | 3   | 2 | 1 | 0 | 6  | 4  | 2  | 7   |
-			| 2    | Egypt        | 3   | 1 | 0 | 2 | 3  | 4  | -1 | 3   |
-			| 3    | Saudi Arabia | 3   | 0 | 0 | 3 | 2  | 5  | -3 | 0   |
+			| 3    | Egypt        | 3   | 1 | 0 | 2 | 3  | 4  | -1 | 3   |
+			| 4    | Saudi Arabia | 3   | 0 | 0 | 3 | 2  | 5  | -3 | 0   |
 		And matches in "Round of 16" should match
 			| matchnumber | match                              |
 			| 49          | Winner Group A - Runner-up Group B |
@@ -130,8 +130,8 @@ Feature: Place bets on matches and get score after matches play
 			| rank | team         | Pld | W | D | L | GF | GA | GD | Pts |
 			| 1    | Russia       | 1   | 1 | 0 | 0 | 2  | 1  | 1  | 3   |
 			| 1    | Uruguay      | 1   | 1 | 0 | 0 | 2  | 1  | 1  | 3   |
-			| 2    | Egypt        | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
-			| 2    | Saudi Arabia | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
+			| 3    | Egypt        | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
+			| 3    | Saudi Arabia | 1   | 0 | 0 | 1 | 1  | 2  | -1 | 0   |
 		When match results are
 			| round | match                  | result |
 			| 2     | Russia - Egypt         | 2-2    |
@@ -151,7 +151,7 @@ Feature: Place bets on matches and get score after matches play
 			| 1    | Uruguay      | 3   | 3 | 0 | 0 | 5  | 2  | 3  | 9   |
 			| 2    | Russia       | 3   | 1 | 1 | 1 | 4  | 4  | 0  | 4   |
 			| 2    | Egypt        | 3   | 1 | 1 | 1 | 4  | 4  | 0  | 4   |
-			| 3    | Saudi Arabia | 3   | 0 | 0 | 3 | 2  | 5  | -3 | 0   |
+			| 4    | Saudi Arabia | 3   | 0 | 0 | 3 | 2  | 5  | -3 | 0   |
 		And matches in "Round of 16" should match
 			| matchnumber | match                              |
 			| 49          | Uruguay - Runner-up Group B        |
