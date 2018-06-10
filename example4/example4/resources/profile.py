@@ -1,39 +1,39 @@
 import falcon
-from marshmallow import fields, Schema
+from marshmallow import fields
 from ..utils import URLFor, StrictSchema, update_item_fields, TimeBase, hash_password
 from .resource import Resource
 from ..model import DBBet, DBMatch, DBUser
 
-class UserSchema(StrictSchema):
+class ProfileSchema(StrictSchema):
 	id = fields.Integer()
-	href = URLFor('/user/{id}')
+	href = URLFor('/profile')
 	email = fields.Email()
-	status = fields.String()
-	admin = fields.Boolean()
 	fullname = fields.String()
+	#TODO /profile/bets instead?
 	bets = URLFor('/bets')
 	score = fields.Integer()
 	creation = fields.DateTime()
 	connection = fields.DateTime()
 
-class UserPostSchema(StrictSchema):
+class ProfilePostSchema(StrictSchema):
 	email = fields.Email(required = True)
 	password = fields.String(required = True)
-	status = fields.String()
-	admin = fields.Boolean()
 	fullname = fields.String(required = True)
 
-class UserPatchSchema(StrictSchema):
+class ProfilePatchSchema(StrictSchema):
 	email = fields.Email()
 	password = fields.String()
-	status = fields.String()
-	admin = fields.Boolean()
 	fullname = fields.String()
 
-class Users(Resource):
-	schema = UserSchema()
-	get_schema = UserSchema(many = True)
-	post_request_schema = UserPostSchema()
+class Profile(Resource):
+	schema = ProfileSchema()
+	post_request_schema = ProfilePostSchema()
+	patch_request_schema = ProfilePatchSchema()
+
+	# To allow self registration with POST, no authorization is required here
+	auth = {
+		'exempt_methods': 'POST'
+	}
 
 	def __init__(self, timebase):
 		# type: (TimeBase) -> None
@@ -41,15 +41,18 @@ class Users(Resource):
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		self.check_admin(req)
-		req.context['result'] = self.session().query(DBUser).all()
+		self.check_and_set_result(
+			self.session().query(DBUser).filter_by(id = req.context['user'].id).one_or_none())
 
 	def on_post(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		self.check_admin(req)
-		user = DBUser(**req.context['json'])
-		user.password = hash_password(user.password)
-		user.creation = self.now()
+		input = req.context['json']
+		user = DBUser(	email = input['email'],
+						password = hash_password(input['password']),
+						status = 'pending',
+						admin = False,
+						fullname = input['fullname'],
+						creation = self.now())
 		self.session().add(user)
 		self.session().commit()
 		self.session().refresh(user)
@@ -62,36 +65,23 @@ class Users(Resource):
 		req.context['result'] = user
 		resp.status = falcon.HTTP_CREATED
 
-class User(Resource):
-	schema = UserSchema()
-	patch_request_schema = UserPatchSchema()
-
-	def on_get(self, req, resp, id_or_name):
-		# type: (falcon.Request, falcon.Response, str) -> None
-		self.check_admin(req)
-		self.check_and_set_result(req, 'user', self.get_user(id_or_name))
-
-	def on_patch(self, req, resp, id_or_name):
-		# type: (falcon.Request, falcon.Response, int) -> None
-		# only admin can modify a user
-		self.check_admin(req)
-		user = self.check_result('user', self.get_user(id_or_name))
+	def on_patch(self, req, resp):
+		# type: (falcon.Request, falcon.Response) -> None
+		user = req.context['user']
 		values = req.context['json']
-
 		# hash password if modified
 		if 'password' in values.keys():
 			values['password'] = hash_password(values['password'])
-		if update_item_fields(user, User.patch_request_schema.fields, values):
+		if update_item_fields(user, Profile.patch_request_schema.fields, values):
 			session = self.session()
 			session.add(user)
 			session.commit()
 			session.refresh(user)
 		req.context['result'] = user
 
-	def on_delete(self, req, resp, id_or_name):
+	def on_delete(self, req, resp):
 		# type: (falcon.Request, falcon.Response, str) -> None
-		self.check_admin(req)
-		user = self.check_result('user', self.get_user(id_or_name))
+		user = req.context['user']
 		# delete all bets
 		self.session().query(DBBet).filter_by(better_id = user.id).delete(synchronize_session = False)
 		self.session().delete(user)

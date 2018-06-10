@@ -74,7 +74,7 @@ def create_app():
 	api.add_error_handler(falcon.HTTPError, api._http_error_handler)
 	api.add_error_handler(falcon.HTTPStatus, api._http_status_handler)
 
-	from .resources import Team, Teams, Venue, Venues, Match, Matches, Bets, User, Users, Token, Time
+	from .resources import Team, Teams, Venue, Venues, Match, Matches, Bets, User, Users, Token, Time, Profile
 
 	if config.timebase_changes:
 		api.add_route('/time', Time(timebase))
@@ -88,6 +88,7 @@ def create_app():
 	api.add_route('/user', Users(timebase))
 	api.add_route('/user/{id_or_name}', User())
 	api.add_route('/bet', Bets(timebase))
+	api.add_route('/profile', Profile(timebase))
 
 	logger.info('API service started.')
 	
