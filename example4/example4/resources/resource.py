@@ -44,7 +44,7 @@ class Resource(object):
 
 	def get_user(self, id_or_name):
 		# type: (str) -> DBUser
-		if id_or_name.isnumeric():
+		if isinstance(id_or_name, int) or id_or_name.isnumeric():
 			return self.session().query(DBUser).filter_by(id = int(id_or_name)).one_or_none()
 		else:
 			return self.session().query(DBUser).filter_by(email = id_or_name).one_or_none()

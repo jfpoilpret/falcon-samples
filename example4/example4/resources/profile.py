@@ -1,8 +1,11 @@
 import falcon
-from marshmallow import fields
+import logging
+from marshmallow import fields, validates, ValidationError
 from ..utils import URLFor, StrictSchema, update_item_fields, TimeBase, hash_password
 from .resource import Resource
 from ..model import DBBet, DBMatch, DBUser
+
+logger = logging.getLogger(__name__)
 
 class ProfileSchema(StrictSchema):
 	id = fields.Integer()
@@ -20,10 +23,22 @@ class ProfilePostSchema(StrictSchema):
 	password = fields.String(required = True)
 	fullname = fields.String(required = True)
 
+	@validates('password')
+	def verify_result(self, value):
+		if not value:
+			logger.info('ProfilePostSchema empty \'password\'')
+			raise ValidationError('password must not be empty', 'password')
+
 class ProfilePatchSchema(StrictSchema):
 	email = fields.Email()
 	password = fields.String()
 	fullname = fields.String()
+
+	@validates('password')
+	def verify_result(self, value):
+		if not value:
+			logger.info('ProfilePatchSchema empty \'password\'')
+			raise ValidationError('password must not be empty', 'password')
 
 class Profile(Resource):
 	schema = ProfileSchema()
@@ -41,8 +56,7 @@ class Profile(Resource):
 
 	def on_get(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		self.check_and_set_result(
-			self.session().query(DBUser).filter_by(id = req.context['user'].id).one_or_none())
+		self.check_and_set_result(req, 'profile', self.get_user(req.context['user'].id))
 
 	def on_post(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
@@ -67,7 +81,7 @@ class Profile(Resource):
 
 	def on_patch(self, req, resp):
 		# type: (falcon.Request, falcon.Response) -> None
-		user = req.context['user']
+		user = self.check_result('profile', self.get_user(req.context['user'].id))
 		values = req.context['json']
 		# hash password if modified
 		if 'password' in values.keys():

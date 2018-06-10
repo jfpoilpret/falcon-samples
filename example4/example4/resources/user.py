@@ -1,8 +1,11 @@
 import falcon
-from marshmallow import fields, Schema
+import logging
+from marshmallow import fields, Schema, validates, ValidationError
 from ..utils import URLFor, StrictSchema, update_item_fields, TimeBase, hash_password
 from .resource import Resource
 from ..model import DBBet, DBMatch, DBUser
+
+logger = logging.getLogger(__name__)
 
 class UserSchema(StrictSchema):
 	id = fields.Integer()
@@ -23,12 +26,36 @@ class UserPostSchema(StrictSchema):
 	admin = fields.Boolean()
 	fullname = fields.String(required = True)
 
+	@validates('status')
+	def verify_result(self, value):
+		if value not in ('pending', 'approved', 'suspended'):
+			logger.info('UserPostSchema incorrect \'status\' value \'%s\'' % value)
+			raise ValidationError('status must be one of \'pending\', \'approved\', \'suspended\'', 'status')
+
+	@validates('password')
+	def verify_result(self, value):
+		if not value:
+			logger.info('UserPostSchema empty \'password\'')
+			raise ValidationError('password must not be empty', 'password')
+
 class UserPatchSchema(StrictSchema):
 	email = fields.Email()
 	password = fields.String()
 	status = fields.String()
 	admin = fields.Boolean()
 	fullname = fields.String()
+
+	@validates('status')
+	def verify_result(self, value):
+		if value not in ('pending', 'approved', 'suspended'):
+			logger.info('UserPostSchema incorrect \'status\' value \'%s\'' % value)
+			raise ValidationError('status must be one of \'pending\', \'approved\', \'suspended\'', 'status')
+
+	@validates('password')
+	def verify_result(self, value):
+		if not value:
+			logger.info('UserPatchSchema empty \'password\'')
+			raise ValidationError('password must not be empty', 'password')
 
 class Users(Resource):
 	schema = UserSchema()
