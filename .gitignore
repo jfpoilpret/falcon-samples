@@ -3,6 +3,10 @@ __pycache__
 .pytest_cache
 *.sqlite
 *.log
+
 node_modules
 */web/dist/*
+
+.env.local
+.env.*.local
 
