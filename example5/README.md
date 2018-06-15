@@ -26,10 +26,18 @@ Also install useful tools during project development:
 	pip3 install behave	# BDD test library
 
 
-Develop fourth example
+Develop fifth example
 ----------------------
-Create new module from copy of example5 (without `.venv`, `__pycache__`...)
+Install Angular CLI
 
+	> sudo npm install -g @angular/cli
+
+Create application and add dependencies
+
+	> ng new front-end
+	> cd front-end
+	> npm install bootstrap
+	> npm install --save @ng-bootstrap/ng-bootstrap
 
 
 Debug with Visual Studio Code
