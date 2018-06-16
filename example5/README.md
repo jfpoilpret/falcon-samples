@@ -39,6 +39,9 @@ Create application and add dependencies
 	> npm install bootstrap
 	> npm install --save @ng-bootstrap/ng-bootstrap
 
+Build and run front-end
+	> npm start
+
 
 Debug with Visual Studio Code
 -----------------------------
