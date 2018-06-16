@@ -32,5 +32,16 @@
         "FIXME"
     ],
     "editor.insertSpaces": false,
-    "editor.detectIndentation": false
+	"editor.detectIndentation": false,
+	"files.watcherExclude": {
+		"**/.git/**": true,
+		"**/node_modules/**": true,
+		"**/.venv/**": true
+	},
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/bower_components": true,
+		"**/.venv/**": true
+	},
+	"python.pythonPath": "${workspaceFolder}/.venv/bin/python3"
 }
