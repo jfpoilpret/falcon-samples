@@ -87,7 +87,7 @@ def test_post_user(admin_client):
 	# check creation date
 	creation = parse_date(user['creation'])
 	delta = creation - datetime.now(timezone.utc)
-	assert -2 < delta.total_seconds() < +2
+	assert -4 < delta.total_seconds() < +4
 
 	# delete user
 	response = admin_client.simulate_delete('/user/%d' % user['id'])
