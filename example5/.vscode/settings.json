@@ -43,5 +43,6 @@
 		"**/bower_components": true,
 		"**/.venv/**": true
 	},
-	"python.pythonPath": "${workspaceFolder}/.venv/bin/python3"
+	"python.pythonPath": "${workspaceFolder}/.venv/bin/python3",
+	"python.linting.enabled": true
 }
