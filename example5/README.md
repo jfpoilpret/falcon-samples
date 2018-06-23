@@ -39,6 +39,9 @@ Create application and add dependencies
 	> npm install bootstrap
 	> npm install --save @ng-bootstrap/ng-bootstrap
 
+Build front-end (and get all dependencies, mandatory for further development)
+	> npm install
+	
 Build and run front-end
 	> npm start
 
