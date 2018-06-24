@@ -11,6 +11,7 @@ export class MessagesComponent implements OnInit {
 	constructor(public messagesService: MessagesService) { }
 
 	ngOnInit() {
+		// TODO for tests only remvoe afterwards
 		this.messagesService.addInfo('Hello');
 		this.messagesService.addWarning('This is a warning');
 	}

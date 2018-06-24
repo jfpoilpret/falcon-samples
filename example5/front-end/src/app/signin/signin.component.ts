@@ -7,13 +7,13 @@ import { BetService } from '../BetService.service';
 	styleUrls: ['./signin.component.css']
 })
 export class SigninComponent implements OnInit {
-
-	constructor(private betService: BetService) { }
+	constructor(public betService: BetService) { }
 
 	ngOnInit() {
 	}
 
 	onSignIn(email: string, password: string) {
+		console.log(`onSignin(${email})`);
 		this.betService.login(email, password);
 	}
 }

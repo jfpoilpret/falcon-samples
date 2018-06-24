@@ -69,7 +69,6 @@ export interface Bet {
 	result?: string;
 }
 
-// TODO catch error for login => need MessageServcie that will show something as an alert
 // TODO catch error for all calls
 // TODO use Http interceptor fro auto handling of authentication, and possibly errors too?
 @Injectable({
@@ -90,15 +89,20 @@ export class BetService {
 	}
 
 	login(email: string, password: string) {
+		console.log(`login ${email}`);
 		const options = {
 			headers: new HttpHeaders({
 				'Content-Type': 'application/json',
-				'Authorization': 'Basic:' + btoa(`${email}:${password}`)
+				'Authorization': 'Basic: ' + btoa(`${email}:${password}`)
 			})};
-		this.http.get<Token>('token', options).pipe(
+		this.http.get<Token>('/api/token', options).pipe(
 			tap(token => this.token = token),
 			// catchError(noop)
 		);
+	}
+
+	isConnected(): boolean {
+		return this.token != null;
 	}
 
 	getProfile(): Observable<User> {

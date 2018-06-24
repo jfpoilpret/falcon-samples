@@ -1,0 +1,26 @@
+Front-end
+=========
+
+1. setup proxy for debug
+2. review service organization per REST resource: token, user, team, match, bet...
+3. implement components in this order:
+	- signin (Token, Profile)
+	- menu
+	- bets (Bet)
+	- matches (Match)
+	- time (Time)
+	
+Back-end
+========
+
+1. Adapt deps to include postgres
+2. Setup postgres configuration
+3. Install docker and docker-compose
+4. Check back-end on postgres docker image
+
+System
+======
+
+1. Prepare docker images for back-end and front-end (nginx)
+2. Setup docker-compose to launch all images at once
+
