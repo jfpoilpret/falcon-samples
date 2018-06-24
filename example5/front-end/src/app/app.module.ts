@@ -5,11 +5,15 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
 import { MenuComponent } from './menu/menu.component';
+import { SigninComponent } from './signin/signin.component';
+import { MessagesComponent } from './messages/messages.component';
 
 @NgModule({
 	declarations: [
 		AppComponent,
-		MenuComponent
+		MenuComponent,
+		SigninComponent,
+		MessagesComponent
 	],
 	imports: [
 		BrowserModule,

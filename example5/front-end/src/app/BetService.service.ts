@@ -1,28 +1,29 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { noop } from 'rxjs';
+import { MessagesService, MessageType } from './Messages.service';
 
 interface Token {
 	token: string;
 	expiry: Date;
 }
 
-// FIXME is that the right to define enums in typescript?
 enum UserState {
-	pending,
-	approved,
-	suspended
+	pending = 'pending',
+	approved = 'approved',
+	suspended = 'suspended'
 }
 
 export interface User {
 	id: number;
 	email: string;
+	status: UserState;
 	admin: boolean;
 	fullname: string;
 	score: number;
 	creation: Date;
-	conection?: Date;
+	connection?: Date;
 }
 
 export interface Team {
@@ -68,28 +69,31 @@ export interface Bet {
 	result?: string;
 }
 
+// TODO catch error for login => need MessageServcie that will show something as an alert
+// TODO catch error for all calls
+// TODO use Http interceptor fro auto handling of authentication, and possibly errors too?
 @Injectable({
 	providedIn: 'root'
 })
 export class BetService {
 	private token: Token;
 
-	constructor(private http: HttpClient) { }
+	constructor(private http: HttpClient, private messagesService: MessagesService) { }
 
 	private headers() {
 		return {
 			headers: new HttpHeaders({
 				'Content-Type': 'application/json',
-				'Authorization': this.token.token
+				'Authorization': 'Token: ' + btoa(this.token.token)
 			})
 		};
 	}
 
-	signIn(email: string, password: string) {
+	login(email: string, password: string) {
 		const options = {
 			headers: new HttpHeaders({
 				'Content-Type': 'application/json',
-				'Authorization': email
+				'Authorization': 'Basic:' + btoa(`${email}:${password}`)
 			})};
 		this.http.get<Token>('token', options).pipe(
 			tap(token => this.token = token),
@@ -97,7 +101,12 @@ export class BetService {
 		);
 	}
 
-	getBets() {
+	getProfile(): Observable<User> {
+		return this.http.get<User>('/profile', this.headers());
+	}
+
+	getBets(): Observable<Bet[]> {
+		return this.http.get<Bet[]>('/bet', this.headers());
 	}
 
 	getMatches() {
