@@ -51,3 +51,10 @@ Debug with Visual Studio Code
 
 Open `server.py` file and run Debug "Python: Current File".
 
+Launch back-end with gunicorn
+-----------------------------
+
+	source .venv/bin/activate
+	gunicorn --reload example5.app
+
+
